@@ -39,10 +39,10 @@ def create_sphinx_setup(provider, repo_url, token, branch, docstring_analysis_fi
     """Sets up Sphinx documentation for a repository based on docstring coverage.
     
         Args:
-            provider (str): The version control provider (e.g., 'gitlab' or 'github').
+            provider (str): The version control provider (e.g., 'gitlab', 'github').
             repo_url (str): The URL of the repository.
             token (str): Access token for the repository.
-            branch (str): The branch to operate on.
+            branch (str): The branch to set up documentation on.
             docstring_analysis_file (str): Path to the CSV file containing docstring analysis.
     
         Returns:

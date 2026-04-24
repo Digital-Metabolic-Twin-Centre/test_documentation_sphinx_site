@@ -8,7 +8,7 @@ class GenericCodeBlockExtractor:
     
     Args:
         file_content (str): The content of the file as a string.
-        file_name (str): The name of the file, used to determine the language.
+        file_name (str): The name of the file, used for language detection.
     
     Returns:
         List[str]: A list of extracted code blocks.
@@ -47,7 +47,7 @@ class GenericCodeBlockExtractor:
 
     def __init__(self, file_content: str, file_name: str):
         """
-        """Initialize a new instance with file content and name.
+        """Initialize a file with content and name, detecting its language.
         
             Args:
                 file_content (str): The content of the file.
@@ -161,14 +161,14 @@ class GenericCodeBlockExtractor:
 
     def _extract_python_function_complete(self, lines: List[str], start_idx: int) -> dict:
         """
-        """Extracts a complete Python function from a list of code lines.
+        """Extracts a complete Python function from a list of code lines starting at a given index.
         
             Args:
                 lines (List[str]): The list of code lines.
-                start_idx (int): The starting index to search for the function.
+                start_idx (int): The index to start extraction from.
         
             Returns:
-                dict: A dictionary containing the function code block and the ending line index, or None if not found.
+                dict: A dictionary containing the function code block and the ending line index, or None if incomplete.
             """
         """
         block = []
@@ -272,7 +272,7 @@ class GenericCodeBlockExtractor:
 
     def _extract_matlab_class(self, lines: List[str], start_idx: int) -> dict:
         """
-        """Extracts a MATLAB code block from a list of lines starting at a given index.
+        Extracts a MATLAB code block from a list of lines starting at a given index.
         
             Args:
                 lines (List[str]): The list of code lines.
@@ -280,7 +280,6 @@ class GenericCodeBlockExtractor:
         
             Returns:
                 dict: A dictionary containing the extracted code block and the ending line index.
-            """
         """
         block = []
         header = f"# --- Code Block starts at line {start_idx + 1} ---"
@@ -304,10 +303,10 @@ class GenericCodeBlockExtractor:
         
             Args:
                 lines (List[str]): The list of code lines.
-                start_idx (int): The starting index to search for the code block.
+                start_idx (int): The index to start extraction from.
         
             Returns:
-                dict: A dictionary containing the extracted code block and the line number where it ends.
+                dict: A dictionary containing the extracted block and the ending line index.
             """
         """
         block = []

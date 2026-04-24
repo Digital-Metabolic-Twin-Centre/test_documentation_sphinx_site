@@ -33,7 +33,7 @@ async def generate_docs(req: RepoRequest):
             req (RepoRequest): The request object containing provider, repo_url, token, and branch.
     
         Returns:
-            dict: A dictionary with status, sphinx_setup_created flag, and docstring analysis results.
+            dict: A dictionary with the status of the operation and analysis results.
         """
     """
     logger.info(

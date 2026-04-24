@@ -161,13 +161,13 @@ def fetch_repo_tree(
     def _fetch_tree(path: str = "") -> List[Dict]:
         """
         """
-        Fetches the repository tree from GitHub or GitLab.
+        Fetches the directory tree from a specified repository on GitHub or GitLab.
         
-            Args:
-                path (str): The path to the directory in the repository.
+        Args:
+            path (str): The path to the directory in the repository.
         
-            Returns:
-                List[Dict]: A list of files and directories in the specified path.
+        Returns:
+            List[Dict]: A list of files and directories in the specified path.
         """
         """
         if provider == "github":

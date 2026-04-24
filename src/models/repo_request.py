@@ -3,7 +3,7 @@ from pydantic import BaseModel
 
 class RepoRequest(BaseModel):
     """
-    """Represents a request for repository information.
+    """Represents a request to access a repository.
     
         Args:
             provider (str): The repository provider, either 'github' or 'gitlab'.
