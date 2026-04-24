@@ -1,0 +1,250 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>src.utils.generate_yml_content &mdash; Auto Docs</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=01f3b618" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/fonts.css?v=5583d106" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=01f3b618" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Auto Docs
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Guides</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting-started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api-guide.html">API Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../architecture.html">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../outputs.html">Outputs and Reports</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../autoapi/index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Auto Docs</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">src.utils.generate_yml_content</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for src.utils.generate_yml_content</h1><div class="highlight"><pre>
+<div class="viewcode-block" id="generate_gitlab_ci_file">
+<a class="viewcode-back" href="../../../autoapi/src/utils/generate_yml_content/index.html#src.utils.generate_yml_content.generate_gitlab_ci_file">[docs]</a>
+<span></span><span class="k">def</span><span class="w"> </span><span class="nf">generate_gitlab_ci_file</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generates a .gitlab-ci.yml file in the specified remote GitLab repository.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        repo_path (str): Repository path (e.g., &#39;user/repo&#39;).</span>
+<span class="sd">        access_token (str): GitLab private token.</span>
+<span class="sd">        branch (str, optional): Branch name. Defaults to &quot;main&quot;.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        bool: True if the file was created successfully, False otherwise.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">gitlab_ci_content</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;stages:</span>
+<span class="s2">  - docs</span>
+<span class="s2">  - deploy</span>
+
+<span class="s2">variables:</span>
+<span class="s2">  PY_VERSION: &quot;3.11&quot;</span>
+<span class="s2">  DOCS_SRC: &quot;docs/source&quot;</span>
+<span class="s2">  BUILD_DIR: &quot;docs/build/html&quot;</span>
+<span class="s2">  CONF_PY: &quot;docs/source/conf.py&quot;</span>
+<span class="s2">  PROJECT_NAME: &quot;API Documentation&quot;</span>
+<span class="s2">  PROJECT_AUTHOR: &quot;Development Team&quot;</span>
+
+<span class="s2">build_sphinx:</span>
+<span class="s2">  stage: docs</span>
+<span class="s2">  image: python:$</span><span class="si">{PY_VERSION}</span>
+<span class="s2">  before_script:</span>
+<span class="s2">    - python -m pip install uv</span>
+<span class="s2">    - uv pip install --system sphinx==8.2.3 sphinx-autoapi==3.6.0 sphinx-rtd-theme==3.0.2</span>
+<span class="s2">  script:</span>
+<span class="s2">    # Create docs directory structure if it doesn&#39;t exist</span>
+<span class="s2">    - mkdir -p docs/source</span>
+<span class="s2">    - |</span>
+<span class="s2">      if [ ! -f &quot;$CONF_PY&quot; ]; then</span>
+<span class="s2">        sphinx-quickstart --quiet --project &quot;$PROJECT_NAME&quot; </span><span class="se">\\</span>
+<span class="s2">          --author &quot;$PROJECT_AUTHOR&quot; --sep --makefile </span><span class="se">\\</span>
+<span class="s2">          --batchfile --ext-autodoc docs</span>
+<span class="s2">      fi</span>
+<span class="s2">    # Update conf.py with autoapi settings</span>
+<span class="s2">    - |</span>
+<span class="s2">      if [ -f &quot;update_conf.py&quot; ]; then</span>
+<span class="s2">        python update_conf.py &quot;$CONF_PY&quot;</span>
+<span class="s2">      fi</span>
+<span class="s2">    # Build the documentation</span>
+<span class="s2">    - sphinx-build -b html &quot;$DOCS_SRC&quot; &quot;$BUILD_DIR&quot;</span>
+<span class="s2">  artifacts:</span>
+<span class="s2">    paths:</span>
+<span class="s2">      - docs/build/html</span>
+<span class="s2">    expire_in: 1 week</span>
+<span class="s2">  only:</span>
+<span class="s2">    - dev</span>
+<span class="s2">    - main</span>
+
+<span class="s2">pages:</span>
+<span class="s2">  stage: deploy</span>
+<span class="s2">  dependencies:</span>
+<span class="s2">    - build_sphinx</span>
+<span class="s2">  script:</span>
+<span class="s2">    # GitLab Pages expects content in a &#39;public&#39; directory</span>
+<span class="s2">    - mkdir -p public</span>
+<span class="s2">    - cp -r docs/build/html/* public/</span>
+<span class="s2">  artifacts:</span>
+<span class="s2">    paths:</span>
+<span class="s2">      - public</span>
+<span class="s2">  only:</span>
+<span class="s2">    - dev</span>
+<span class="s2">    - main</span>
+<span class="s2">&quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="n">gitlab_ci_content</span></div>
+
+
+
+<div class="viewcode-block" id="generate_github_actions_file">
+<a class="viewcode-back" href="../../../autoapi/src/utils/generate_yml_content/index.html#src.utils.generate_yml_content.generate_github_actions_file">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">generate_github_actions_file</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generates a GitHub Actions workflow file for building Sphinx docs.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str: Workflow file content.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">github_actions_content</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;name: Build Docs</span>
+
+<span class="s2">on:</span>
+<span class="s2">  push:</span>
+<span class="s2">    branches:</span>
+<span class="s2">      - main</span>
+<span class="s2">      - dev</span>
+<span class="s2">  pull_request:</span>
+<span class="s2">    branches:</span>
+<span class="s2">      - main</span>
+<span class="s2">      - dev</span>
+
+<span class="s2">jobs:</span>
+<span class="s2">  docs:</span>
+<span class="s2">    runs-on: ubuntu-latest</span>
+
+<span class="s2">    steps:</span>
+<span class="s2">      - name: Checkout repository</span>
+<span class="s2">        uses: actions/checkout@v4</span>
+
+<span class="s2">      - name: Set up Python</span>
+<span class="s2">        uses: actions/setup-python@v5</span>
+<span class="s2">        with:</span>
+<span class="s2">          python-version: &quot;3.11&quot;</span>
+
+<span class="s2">      - name: Set up uv</span>
+<span class="s2">        uses: astral-sh/setup-uv@v5</span>
+
+<span class="s2">      - name: Install documentation dependencies</span>
+<span class="s2">        run: uv pip install --system sphinx==8.2.3 sphinx-autoapi==3.6.0 sphinx-rtd-theme==3.0.2</span>
+
+<span class="s2">      - name: Ensure docs scaffolding exists</span>
+<span class="s2">        run: |</span>
+<span class="s2">          mkdir -p docs/source</span>
+<span class="s2">          if [ ! -f &quot;docs/source/conf.py&quot; ]; then</span>
+<span class="s2">            sphinx-quickstart --quiet --project &quot;API Documentation&quot; </span><span class="se">\</span>
+<span class="s2">              --author &quot;Development Team&quot; --sep --makefile </span><span class="se">\</span>
+<span class="s2">              --batchfile --ext-autodoc docs</span>
+<span class="s2">          fi</span>
+
+<span class="s2">      - name: Update Sphinx AutoAPI configuration</span>
+<span class="s2">        run: |</span>
+<span class="s2">          if [ -f &quot;update_conf.py&quot; ]; then</span>
+<span class="s2">            python update_conf.py &quot;docs/source/conf.py&quot;</span>
+<span class="s2">          fi</span>
+
+<span class="s2">      - name: Build documentation</span>
+<span class="s2">        run: sphinx-build -b html docs/source docs/build/html</span>
+
+<span class="s2">      - name: Upload documentation artifact</span>
+<span class="s2">        uses: actions/upload-artifact@v4</span>
+<span class="s2">        with:</span>
+<span class="s2">          name: docs-html</span>
+<span class="s2">          path: docs/build/html</span>
+<span class="s2">&quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="n">github_actions_content</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Auto Doc Team.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

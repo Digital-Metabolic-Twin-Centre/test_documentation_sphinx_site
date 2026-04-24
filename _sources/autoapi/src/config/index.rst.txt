@@ -1,0 +1,21 @@
+src.config
+==========
+
+.. py:module:: src.config
+
+.. autoapi-nested-parse::
+
+   Configuration package.
+
+
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   /autoapi/src/config/config/index
+   /autoapi/src/config/log_config/index
+
+

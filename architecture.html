@@ -1,0 +1,181 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Architecture &mdash; Auto Docs</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="_static/custom.css?v=01f3b618" />
+      <link rel="stylesheet" type="text/css" href="_static/fonts.css?v=5583d106" />
+      <link rel="stylesheet" type="text/css" href="_static/custom.css?v=01f3b618" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Outputs and Reports" href="outputs.html" />
+    <link rel="prev" title="API Guide" href="api-guide.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Auto Docs
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Guides</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api-guide.html">API Guide</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="outputs.html">Outputs and Reports</a></li>
+<li class="toctree-l1"><a class="reference internal" href="autoapi/index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Auto Docs</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Architecture</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="architecture">
+<h1>Architecture<a class="headerlink" href="#architecture" title="Link to this heading"></a></h1>
+<section class="callout-band">
+  <p class="eyebrow">System View</p>
+  <p>
+    Auto Docs is structured as a thin API layer over a documentation-analysis pipeline,
+    with repository utilities and Sphinx automation providing the integration points.
+  </p>
+</section><section id="processing-flow">
+<h2>Processing flow<a class="headerlink" href="#processing-flow" title="Link to this heading"></a></h2>
+<p>Auto Docs follows a straightforward pipeline:</p>
+<ol class="arabic simple">
+<li><p>Receive repository access details through the API</p></li>
+<li><p>Read the repository tree from GitHub or GitLab</p></li>
+<li><p>Filter supported source files</p></li>
+<li><p>Extract code blocks from each file</p></li>
+<li><p>Check for existing docstrings</p></li>
+<li><p>Generate suggested docstrings where needed</p></li>
+<li><p>Save analysis outputs locally</p></li>
+<li><p>Prepare Sphinx and CI/CD artifacts for documentation publishing</p></li>
+</ol>
+</section>
+<section id="main-modules">
+<h2>Main modules<a class="headerlink" href="#main-modules" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">src/main.py</span></code>: FastAPI entry point</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">src/router/router.py</span></code>: request handling and HTTP responses</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">src/services/doc_services.py</span></code>: repository analysis orchestration</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">src/services/sphinx_services.py</span></code>: Sphinx setup and CI workflow creation</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">src/utils/code_block_extraction.py</span></code>: code block extraction logic</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">src/utils/docstring_validation.py</span></code>: validation of existing documentation</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">src/utils/docstring_generation.py</span></code>: OpenAI-driven docstring generation</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">src/utils/git_utils.py</span></code>: provider integration for GitHub and GitLab</p></li>
+</ul>
+</section>
+<section id="deployment-model">
+<h2>Deployment model<a class="headerlink" href="#deployment-model" title="Link to this heading"></a></h2>
+<p>The service can run:</p>
+<ul class="simple">
+<li><p>directly with <code class="docutils literal notranslate"><span class="pre">uvicorn</span></code> for local development</p></li>
+<li><p>inside Docker for containerized execution</p></li>
+<li><p>with GitHub Actions and GitHub Pages for documentation publishing</p></li>
+</ul>
+</section>
+<section id="documentation-model">
+<h2>Documentation model<a class="headerlink" href="#documentation-model" title="Link to this heading"></a></h2>
+<p>The published documentation site combines:</p>
+<ul class="simple">
+<li><p>static guides written in reStructuredText</p></li>
+<li><p>generated API reference pages from AutoAPI</p></li>
+<li><p>project styling layered on top of the Sphinx Read the Docs theme</p></li>
+</ul>
+<section class="card-grid">
+  <article class="card">
+    <p class="eyebrow">Router</p>
+    <h3>Entry point for orchestration</h3>
+    <p>Receives requests, coordinates analysis, and returns operational outcomes through HTTP responses.</p>
+  </article>
+  <article class="card">
+    <p class="eyebrow">Services</p>
+    <h3>Application logic and workflow control</h3>
+    <p>Services handle repository inspection, coverage selection, and Sphinx setup generation for target repositories.</p>
+  </article>
+  <article class="card">
+    <p class="eyebrow">Utilities</p>
+    <h3>Parsing, generation, and provider integration</h3>
+    <p>Utility modules isolate code extraction, docstring logic, and GitHub or GitLab repository operations.</p>
+  </article>
+</section></section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="api-guide.html" class="btn btn-neutral float-left" title="API Guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="outputs.html" class="btn btn-neutral float-right" title="Outputs and Reports" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Auto Doc Team.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

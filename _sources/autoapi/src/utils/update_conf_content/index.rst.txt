@@ -1,0 +1,25 @@
+src.utils.update_conf_content
+=============================
+
+.. py:module:: src.utils.update_conf_content
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   src.utils.update_conf_content.conf_py
+   src.utils.update_conf_content.conf_path
+   src.utils.update_conf_content.text
+
+
+Module Contents
+---------------
+
+.. py:data:: conf_py
+
+.. py:data:: conf_path
+
+.. py:data:: text
+

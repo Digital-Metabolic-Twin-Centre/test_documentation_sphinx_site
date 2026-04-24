@@ -1,0 +1,176 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Outputs and Reports &mdash; Auto Docs</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="_static/custom.css?v=01f3b618" />
+      <link rel="stylesheet" type="text/css" href="_static/fonts.css?v=5583d106" />
+      <link rel="stylesheet" type="text/css" href="_static/custom.css?v=01f3b618" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="API Reference" href="autoapi/index.html" />
+    <link rel="prev" title="Architecture" href="architecture.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Auto Docs
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Guides</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api-guide.html">API Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="architecture.html">Architecture</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Outputs and Reports</a></li>
+<li class="toctree-l1"><a class="reference internal" href="autoapi/index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Auto Docs</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Outputs and Reports</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="outputs-and-reports">
+<h1>Outputs and Reports<a class="headerlink" href="#outputs-and-reports" title="Link to this heading"></a></h1>
+<section class="callout-band">
+  <p class="eyebrow">Artifacts</p>
+  <p>
+    Auto Docs writes outputs that support review, debugging, and documentation publishing.
+    These files are part of the operational value of the system, not just side effects.
+  </p>
+</section><section id="generated-local-files">
+<h2>Generated local files<a class="headerlink" href="#generated-local-files" title="Link to this heading"></a></h2>
+<p>During analysis, Auto Docs writes outputs into the project workspace.</p>
+<p>Key outputs include:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">src/files/block_analysis.csv</span></code>: flattened analysis of detected code blocks</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">src/files/suggested_docstring.txt</span></code>: generated docstring suggestions</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">log/app_&lt;timestamp&gt;.log</span></code>: runtime logs for the service</p></li>
+</ul>
+</section>
+<section id="what-the-reports-contain">
+<h2>What the reports contain<a class="headerlink" href="#what-the-reports-contain" title="Link to this heading"></a></h2>
+<p>The analysis CSV captures:</p>
+<ul class="simple">
+<li><p>file name</p></li>
+<li><p>file path</p></li>
+<li><p>function or module name</p></li>
+<li><p>block type</p></li>
+<li><p>missing docstring status</p></li>
+<li><p>detected language</p></li>
+<li><p>line number</p></li>
+</ul>
+</section>
+<section id="how-to-use-the-outputs">
+<h2>How to use the outputs<a class="headerlink" href="#how-to-use-the-outputs" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>review missing coverage in the CSV report</p></li>
+<li><p>inspect generated suggestions before applying them manually</p></li>
+<li><p>use the logs to debug repository access, parsing, and Sphinx setup steps</p></li>
+</ul>
+</section>
+<section id="publishing-outputs">
+<h2>Publishing outputs<a class="headerlink" href="#publishing-outputs" title="Link to this heading"></a></h2>
+<p>When the documentation pipeline succeeds, the project also produces:</p>
+<ul class="simple">
+<li><p>generated HTML documentation in <code class="docutils literal notranslate"><span class="pre">docs/build/html</span></code></p></li>
+<li><p>GitHub Pages deployment artifacts through GitHub Actions</p></li>
+<li><p>CI/CD documentation setup files for supported repository workflows</p></li>
+</ul>
+<section class="card-grid">
+  <article class="card">
+    <p class="eyebrow">Review</p>
+    <h3>Use CSV output to inspect coverage</h3>
+    <p>See where docstrings are present, where they are missing, and which lines need editorial attention.</p>
+  </article>
+  <article class="card">
+    <p class="eyebrow">Suggest</p>
+    <h3>Keep generated text separate</h3>
+    <p>The suggested docstring output gives teams a reviewable artifact rather than silently rewriting source files.</p>
+  </article>
+  <article class="card">
+    <p class="eyebrow">Publish</p>
+    <h3>Trace the full docs build path</h3>
+    <p>Logs and generated site assets make it easier to debug failures and validate publishing behavior in CI.</p>
+  </article>
+</section></section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="architecture.html" class="btn btn-neutral float-left" title="Architecture" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="autoapi/index.html" class="btn btn-neutral float-right" title="API Reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Auto Doc Team.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

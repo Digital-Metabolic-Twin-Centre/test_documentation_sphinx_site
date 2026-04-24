@@ -1,0 +1,373 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>src.utils.code_block_extraction &mdash; Auto Docs</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=01f3b618" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/fonts.css?v=5583d106" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=01f3b618" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Auto Docs
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Guides</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting-started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api-guide.html">API Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../architecture.html">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../outputs.html">Outputs and Reports</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../autoapi/index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Auto Docs</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">src.utils.code_block_extraction</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for src.utils.code_block_extraction</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span>
+
+
+<div class="viewcode-block" id="GenericCodeBlockExtractor">
+<a class="viewcode-back" href="../../../autoapi/src/utils/code_block_extraction/index.html#src.utils.code_block_extraction.GenericCodeBlockExtractor">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">GenericCodeBlockExtractor</span><span class="p">:</span>
+    <span class="n">LANGUAGE_PATTERNS</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;python&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="sa">r</span><span class="s2">&quot;^\s*def\s+\w+\s*\(&quot;</span><span class="p">,</span>  <span class="c1"># Python function</span>
+            <span class="sa">r</span><span class="s2">&quot;^\s*class\s+\w+\s*(\(.*?\))?:&quot;</span><span class="p">,</span>  <span class="c1"># Python class</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;javascript&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="sa">r</span><span class="s2">&quot;^\s*(export\s+)?(default\s+)?function\s+\w+\s*\(&quot;</span><span class="p">,</span>  <span class="c1"># JS named function</span>
+            <span class="sa">r</span><span class="s2">&quot;^\s*(export\s+)?(default\s+)?class\s+\w+\s*&quot;</span><span class="p">,</span>  <span class="c1"># JS class</span>
+            <span class="sa">r</span><span class="s2">&quot;^\s*document\.\w+\s*\(&quot;</span><span class="p">,</span>  <span class="c1"># document.addEventListener, etc.</span>
+            <span class="sa">r</span><span class="s2">&quot;^\s*\w+\s*=\s*function\s*\(&quot;</span><span class="p">,</span>  <span class="c1"># Function assignments</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;typescript&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="sa">r</span><span class="s2">&quot;^\s*(export\s+)?(default\s+)?function\s+\w+\s*\(&quot;</span><span class="p">,</span>  <span class="c1"># TS named function</span>
+            <span class="sa">r</span><span class="s2">&quot;^\s*(export\s+)?(default\s+)?class\s+\w+\s*&quot;</span><span class="p">,</span>  <span class="c1"># TS class</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;matlab&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="sa">r</span><span class="s2">&quot;^\s*function\s+.*=&quot;</span><span class="p">,</span>  <span class="c1"># MATLAB function (with output)</span>
+            <span class="sa">r</span><span class="s2">&quot;^\s*function\s+\w+&quot;</span><span class="p">,</span>  <span class="c1"># MATLAB function (no output)</span>
+            <span class="sa">r</span><span class="s2">&quot;^\s*classdef\s+\w+&quot;</span><span class="p">,</span>  <span class="c1"># MATLAB class</span>
+        <span class="p">],</span>
+    <span class="p">}</span>
+
+    <span class="n">EXT_LANGUAGE_MAP</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;.py&quot;</span><span class="p">:</span> <span class="s2">&quot;python&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;.js&quot;</span><span class="p">:</span> <span class="s2">&quot;javascript&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;.jsx&quot;</span><span class="p">:</span> <span class="s2">&quot;javascript&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;.ts&quot;</span><span class="p">:</span> <span class="s2">&quot;typescript&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;.tsx&quot;</span><span class="p">:</span> <span class="s2">&quot;typescript&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;.m&quot;</span><span class="p">:</span> <span class="s2">&quot;matlab&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;.matlab&quot;</span><span class="p">:</span> <span class="s2">&quot;matlab&quot;</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_content</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">file_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file_content</span> <span class="o">=</span> <span class="n">file_content</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file_name</span> <span class="o">=</span> <span class="n">file_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">language</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_detect_language</span><span class="p">()</span>
+
+<div class="viewcode-block" id="GenericCodeBlockExtractor._detect_language">
+<a class="viewcode-back" href="../../../autoapi/src/utils/code_block_extraction/index.html#src.utils.code_block_extraction.GenericCodeBlockExtractor._detect_language">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_detect_language</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">ext</span><span class="p">,</span> <span class="n">lang</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">EXT_LANGUAGE_MAP</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">ext</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">lang</span>
+        <span class="k">return</span> <span class="s2">&quot;python&quot;</span>  <span class="c1"># default</span></div>
+
+
+<div class="viewcode-block" id="GenericCodeBlockExtractor.code_block_extractor">
+<a class="viewcode-back" href="../../../autoapi/src/utils/code_block_extraction/index.html#src.utils.code_block_extraction.GenericCodeBlockExtractor.code_block_extractor">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">code_block_extractor</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Extracts all code blocks (including nested) for the detected language.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_content</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span>
+        <span class="n">blocks</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_extract_blocks_recursive</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">),</span> <span class="n">blocks</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">blocks</span></div>
+
+
+<div class="viewcode-block" id="GenericCodeBlockExtractor._extract_blocks_recursive">
+<a class="viewcode-back" href="../../../autoapi/src/utils/code_block_extraction/index.html#src.utils.code_block_extraction.GenericCodeBlockExtractor._extract_blocks_recursive">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_extract_blocks_recursive</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">lines</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="n">start</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">end</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">blocks</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="n">base_indent</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="n">patterns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">LANGUAGE_PATTERNS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">language</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="n">combined_pattern</span> <span class="o">=</span> <span class="s2">&quot;|&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">patterns</span><span class="p">)</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="n">start</span>
+        <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">end</span><span class="p">:</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">indent</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">lstrip</span><span class="p">())</span>
+            <span class="n">match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">combined_pattern</span><span class="p">,</span> <span class="n">line</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">match</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">language</span> <span class="o">!=</span> <span class="s2">&quot;python&quot;</span> <span class="ow">or</span> <span class="n">indent</span> <span class="o">==</span> <span class="n">base_indent</span><span class="p">):</span>
+                <span class="n">block_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_single_block</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">combined_pattern</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">block_info</span><span class="p">:</span>
+                    <span class="n">blocks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">block_info</span><span class="p">[</span><span class="s2">&quot;block&quot;</span><span class="p">])</span>
+                    <span class="c1"># For Python, only recurse into the body of the block</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">language</span> <span class="o">==</span> <span class="s2">&quot;python&quot;</span><span class="p">:</span>
+                        <span class="n">body_start</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span>
+                        <span class="n">body_end</span> <span class="o">=</span> <span class="n">block_info</span><span class="p">[</span><span class="s2">&quot;end_line&quot;</span><span class="p">]</span>
+                        <span class="c1"># Only lines with greater indent than base_indent</span>
+                        <span class="n">body_lines</span> <span class="o">=</span> <span class="p">[]</span>
+                        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">body_start</span><span class="p">,</span> <span class="n">body_end</span><span class="p">):</span>
+                            <span class="k">if</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">):</span>
+                                <span class="n">body_line</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+                                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">body_line</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">body_line</span><span class="o">.</span><span class="n">lstrip</span><span class="p">())</span> <span class="o">&gt;</span> <span class="n">base_indent</span><span class="p">:</span>
+                                    <span class="n">body_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">body_line</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">body_lines</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">_extract_blocks_recursive</span><span class="p">(</span>
+                                <span class="n">body_lines</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">body_lines</span><span class="p">),</span> <span class="n">blocks</span><span class="p">,</span> <span class="n">base_indent</span> <span class="o">+</span> <span class="mi">4</span>
+                            <span class="p">)</span>
+                    <span class="n">i</span> <span class="o">=</span> <span class="n">block_info</span><span class="p">[</span><span class="s2">&quot;end_line&quot;</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span></div>
+
+
+<div class="viewcode-block" id="GenericCodeBlockExtractor._extract_single_block">
+<a class="viewcode-back" href="../../../autoapi/src/utils/code_block_extraction/index.html#src.utils.code_block_extraction.GenericCodeBlockExtractor._extract_single_block">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_extract_single_block</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lines</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">start_idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">pattern</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Extracts a single code block starting from start_idx.</span>
+<span class="sd">        Returns dict with &#39;block&#39; content and &#39;end_line&#39; index.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="n">start_idx</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">language</span> <span class="o">==</span> <span class="s2">&quot;python&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;def&quot;</span><span class="p">):</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_python_function_complete</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="n">start_idx</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;class&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">line</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">):</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_python_class_complete</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="n">start_idx</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">language</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;javascript&quot;</span><span class="p">,</span> <span class="s2">&quot;typescript&quot;</span><span class="p">]:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_curly_brace_block</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="n">start_idx</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">language</span> <span class="o">==</span> <span class="s2">&quot;matlab&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;function&quot;</span><span class="p">):</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_matlab_function</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="n">start_idx</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;classdef&quot;</span><span class="p">):</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extract_matlab_class</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="n">start_idx</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="GenericCodeBlockExtractor._extract_python_function_complete">
+<a class="viewcode-back" href="../../../autoapi/src/utils/code_block_extraction/index.html#src.utils.code_block_extraction.GenericCodeBlockExtractor._extract_python_function_complete">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_extract_python_function_complete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lines</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">start_idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="n">block</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;# --- Code Block starts at line </span><span class="si">{</span><span class="n">start_idx</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2"> ---&quot;</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="n">start_idx</span>
+        <span class="n">function_def_complete</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">):</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">block</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">rstrip</span><span class="p">())</span>
+            <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">):</span>
+                <span class="n">function_def_complete</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">function_indent</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">[</span><span class="n">start_idx</span><span class="p">])</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">[</span><span class="n">start_idx</span><span class="p">]</span><span class="o">.</span><span class="n">lstrip</span><span class="p">())</span>
+                <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">break</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">function_def_complete</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">):</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">current_indent</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">lstrip</span><span class="p">())</span>
+            <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+                <span class="n">block</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">rstrip</span><span class="p">())</span>
+                <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="n">current_indent</span> <span class="o">&lt;=</span> <span class="n">function_indent</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="n">block</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">rstrip</span><span class="p">())</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">footer</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;# --- Code Block ends at line </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2"> ---&quot;</span>
+        <span class="n">full_block</span> <span class="o">=</span> <span class="n">header</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">block</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">footer</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;block&quot;</span><span class="p">:</span> <span class="n">full_block</span><span class="p">,</span> <span class="s2">&quot;end_line&quot;</span><span class="p">:</span> <span class="n">i</span><span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="GenericCodeBlockExtractor._extract_python_class_complete">
+<a class="viewcode-back" href="../../../autoapi/src/utils/code_block_extraction/index.html#src.utils.code_block_extraction.GenericCodeBlockExtractor._extract_python_class_complete">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_extract_python_class_complete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lines</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">start_idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="n">block</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;# --- Code Block starts at line </span><span class="si">{</span><span class="n">start_idx</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2"> ---&quot;</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="n">start_idx</span><span class="p">]</span>
+        <span class="n">block</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">rstrip</span><span class="p">())</span>
+        <span class="n">class_indent</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">lstrip</span><span class="p">())</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="n">start_idx</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">):</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">current_indent</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">lstrip</span><span class="p">())</span>
+            <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+                <span class="n">block</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">rstrip</span><span class="p">())</span>
+                <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="n">current_indent</span> <span class="o">&lt;=</span> <span class="n">class_indent</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="n">block</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">rstrip</span><span class="p">())</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">footer</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;# --- Code Block ends at line </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2"> ---&quot;</span>
+        <span class="n">full_block</span> <span class="o">=</span> <span class="n">header</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">block</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">footer</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;block&quot;</span><span class="p">:</span> <span class="n">full_block</span><span class="p">,</span> <span class="s2">&quot;end_line&quot;</span><span class="p">:</span> <span class="n">i</span><span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="GenericCodeBlockExtractor._extract_matlab_function">
+<a class="viewcode-back" href="../../../autoapi/src/utils/code_block_extraction/index.html#src.utils.code_block_extraction.GenericCodeBlockExtractor._extract_matlab_function">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_extract_matlab_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lines</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">start_idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="n">block</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;# --- Code Block starts at line </span><span class="si">{</span><span class="n">start_idx</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2"> ---&quot;</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="n">start_idx</span><span class="p">]</span>
+        <span class="n">block</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">rstrip</span><span class="p">())</span>
+        <span class="n">nested_level</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="n">start_idx</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">):</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">block</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">rstrip</span><span class="p">())</span>
+            <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;^\s*(if|for|while|switch|try|function|classdef)\b&quot;</span><span class="p">,</span> <span class="n">line</span><span class="p">)</span> <span class="ow">or</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span>
+                <span class="sa">r</span><span class="s2">&quot;^\s*parfor\b&quot;</span><span class="p">,</span> <span class="n">line</span>
+            <span class="p">):</span>
+                <span class="n">nested_level</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">elif</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;^\s*end\b&quot;</span><span class="p">,</span> <span class="n">line</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">nested_level</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="k">break</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">nested_level</span> <span class="o">-=</span> <span class="mi">1</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">footer</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;# --- Code Block ends at line </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2"> ---&quot;</span>
+        <span class="n">full_block</span> <span class="o">=</span> <span class="n">header</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">block</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">footer</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;block&quot;</span><span class="p">:</span> <span class="n">full_block</span><span class="p">,</span> <span class="s2">&quot;end_line&quot;</span><span class="p">:</span> <span class="n">i</span><span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="GenericCodeBlockExtractor._extract_matlab_class">
+<a class="viewcode-back" href="../../../autoapi/src/utils/code_block_extraction/index.html#src.utils.code_block_extraction.GenericCodeBlockExtractor._extract_matlab_class">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_extract_matlab_class</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lines</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">start_idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="n">block</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;# --- Code Block starts at line </span><span class="si">{</span><span class="n">start_idx</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2"> ---&quot;</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="n">start_idx</span><span class="p">]</span>
+        <span class="n">block</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">rstrip</span><span class="p">())</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="n">start_idx</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">):</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">block</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">rstrip</span><span class="p">())</span>
+            <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;^\s*end\b&quot;</span><span class="p">,</span> <span class="n">line</span><span class="p">):</span>
+                <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">break</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">footer</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;# --- Code Block ends at line </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2"> ---&quot;</span>
+        <span class="n">full_block</span> <span class="o">=</span> <span class="n">header</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">block</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">footer</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;block&quot;</span><span class="p">:</span> <span class="n">full_block</span><span class="p">,</span> <span class="s2">&quot;end_line&quot;</span><span class="p">:</span> <span class="n">i</span><span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="GenericCodeBlockExtractor._extract_curly_brace_block">
+<a class="viewcode-back" href="../../../autoapi/src/utils/code_block_extraction/index.html#src.utils.code_block_extraction.GenericCodeBlockExtractor._extract_curly_brace_block">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_extract_curly_brace_block</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lines</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">start_idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="n">block</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;# --- Code Block starts at line </span><span class="si">{</span><span class="n">start_idx</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2"> ---&quot;</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="n">start_idx</span><span class="p">]</span>
+        <span class="n">block</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">rstrip</span><span class="p">())</span>
+        <span class="c1"># Check if opening brace is on this or next line</span>
+        <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;{&quot;</span><span class="p">):</span>
+            <span class="n">brace_count</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s2">&quot;{&quot;</span><span class="p">)</span> <span class="o">-</span> <span class="n">line</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s2">&quot;}&quot;</span><span class="p">)</span>
+            <span class="n">i</span> <span class="o">=</span> <span class="n">start_idx</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">start_idx</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">):</span>
+                <span class="n">block</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lines</span><span class="p">[</span><span class="n">start_idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">rstrip</span><span class="p">())</span>
+                <span class="n">brace_count</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="n">i</span> <span class="o">=</span> <span class="n">start_idx</span> <span class="o">+</span> <span class="mi">2</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span> <span class="ow">and</span> <span class="n">brace_count</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">block</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">rstrip</span><span class="p">())</span>
+            <span class="n">brace_count</span> <span class="o">+=</span> <span class="n">line</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s2">&quot;{&quot;</span><span class="p">)</span> <span class="o">-</span> <span class="n">line</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s2">&quot;}&quot;</span><span class="p">)</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">footer</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;# --- Code Block ends at line </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2"> ---&quot;</span>
+        <span class="n">full_block</span> <span class="o">=</span> <span class="n">header</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">block</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">footer</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;block&quot;</span><span class="p">:</span> <span class="n">full_block</span><span class="p">,</span> <span class="s2">&quot;end_line&quot;</span><span class="p">:</span> <span class="n">i</span><span class="p">}</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Auto Doc Team.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

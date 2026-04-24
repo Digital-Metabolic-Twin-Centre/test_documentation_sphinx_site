@@ -1,0 +1,396 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>src.utils.docstring_validation &mdash; Auto Docs</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=01f3b618" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/fonts.css?v=5583d106" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=01f3b618" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Auto Docs
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Guides</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting-started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api-guide.html">API Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../architecture.html">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../outputs.html">Outputs and Reports</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../autoapi/index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Auto Docs</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">src.utils.docstring_validation</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for src.utils.docstring_validation</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">ast</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">config.log_config</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">utils.docstring_generation</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">format_docstring_for_language</span><span class="p">,</span>
+    <span class="n">generate_docstring_with_openai</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="analyze_docstring_in_blocks">
+<a class="viewcode-back" href="../../../autoapi/src/utils/docstring_validation/index.html#src.utils.docstring_validation.analyze_docstring_in_blocks">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">analyze_docstring_in_blocks</span><span class="p">(</span>
+    <span class="n">code_blocks</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
+    <span class="n">file_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;unknown&quot;</span><span class="p">,</span>
+    <span class="n">file_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;unknown&quot;</span><span class="p">,</span>
+    <span class="n">language</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Analyzes code blocks to find docstring and identify missing ones.</span>
+<span class="sd">    Supports multiple programming languages including Python, JavaScript/TypeScript and MATLAB.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        code_blocks (list): List of code blocks extracted from a file</span>
+<span class="sd">        file_name (str): Name of the file being analyzed</span>
+<span class="sd">        language (str): Programming language of the code blocks</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: Analysis results with docstring information</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">results</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;file_name&quot;</span><span class="p">:</span> <span class="n">file_name</span><span class="p">,</span>
+        <span class="s2">&quot;file_path&quot;</span><span class="p">:</span> <span class="n">file_path</span><span class="p">,</span>
+        <span class="s2">&quot;total_blocks&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">code_blocks</span><span class="p">),</span>
+        <span class="s2">&quot;blocks_with_docstring&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="s2">&quot;blocks_without_docstring&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="s2">&quot;docstring_analysis&quot;</span><span class="p">:</span> <span class="p">[],</span>
+    <span class="p">}</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">analyze_python_block</span><span class="p">(</span><span class="n">clean_code</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Analyze Python code block for docstring&quot;&quot;&quot;</span>
+        <span class="n">analysis</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;function_name&quot;</span><span class="p">:</span> <span class="s2">&quot;unknown&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;block_type&quot;</span><span class="p">:</span> <span class="s2">&quot;unknown&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;docstring_content&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s2">&quot;missing_docstring&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">tree</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">clean_code</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">ast</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">tree</span><span class="p">):</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">FunctionDef</span><span class="p">):</span>
+                    <span class="n">analysis</span><span class="p">[</span><span class="s2">&quot;function_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">name</span>
+                    <span class="n">analysis</span><span class="p">[</span><span class="s2">&quot;block_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;function&quot;</span>
+                    <span class="n">docstring</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">get_docstring</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">docstring</span><span class="p">:</span>
+                        <span class="n">analysis</span><span class="p">[</span><span class="s2">&quot;docstring_content&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">docstring</span>
+                        <span class="n">analysis</span><span class="p">[</span><span class="s2">&quot;missing_docstring&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="k">break</span>
+                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">AsyncFunctionDef</span><span class="p">):</span>
+                    <span class="n">analysis</span><span class="p">[</span><span class="s2">&quot;function_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">name</span>
+                    <span class="n">analysis</span><span class="p">[</span><span class="s2">&quot;block_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;async_function&quot;</span>
+                    <span class="n">docstring</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">get_docstring</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">docstring</span><span class="p">:</span>
+                        <span class="n">analysis</span><span class="p">[</span><span class="s2">&quot;docstring_content&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">docstring</span>
+                        <span class="n">analysis</span><span class="p">[</span><span class="s2">&quot;missing_docstring&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="k">break</span>
+                <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">ClassDef</span><span class="p">):</span>
+                    <span class="n">analysis</span><span class="p">[</span><span class="s2">&quot;function_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">name</span>
+                    <span class="n">analysis</span><span class="p">[</span><span class="s2">&quot;block_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;class&quot;</span>
+                    <span class="n">docstring</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">get_docstring</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">docstring</span><span class="p">:</span>
+                        <span class="n">analysis</span><span class="p">[</span><span class="s2">&quot;docstring_content&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">docstring</span>
+                        <span class="n">analysis</span><span class="p">[</span><span class="s2">&quot;missing_docstring&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="k">break</span>
+        <span class="k">except</span> <span class="ne">SyntaxError</span><span class="p">:</span>
+            <span class="c1"># Fallback to regex</span>
+            <span class="k">return</span> <span class="n">analyze_with_regex</span><span class="p">(</span><span class="n">clean_code</span><span class="p">,</span> <span class="s2">&quot;python&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">analysis</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">analyze_with_regex</span><span class="p">(</span><span class="n">clean_code</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">language</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Analyze code block using regex patterns for different languages&quot;&quot;&quot;</span>
+        <span class="n">analysis</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;function_name&quot;</span><span class="p">:</span> <span class="s2">&quot;unknown&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;block_type&quot;</span><span class="p">:</span> <span class="s2">&quot;unknown&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;docstring_content&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s2">&quot;missing_docstring&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="c1"># Language-specific patterns</span>
+        <span class="n">patterns</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;python&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;function&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;def\s+(\w+)\s*\(&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;class&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;class\s+(\w+)\s*[\(:]&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;docstring&quot;</span><span class="p">:</span> <span class="p">[</span><span class="sa">r</span><span class="s1">&#39;&quot;&quot;&quot;(.*?)&quot;&quot;&quot;&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;&#39;&#39;&#39;(.*?)&#39;&#39;&#39;&quot;</span><span class="p">],</span>
+            <span class="p">},</span>
+            <span class="s2">&quot;javascript&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="c1"># Add a pattern for method calls like document.addEventListener(</span>
+                <span class="s2">&quot;function&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;(?:function\s+(\w+)\s*\()|(?:([\w\.]+)\s*\.\s*(\w+)\s*\()&quot;</span><span class="p">,</span>  <span class="c1"># updated</span>
+                <span class="s2">&quot;class&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;class\s+(\w+)\s*{&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;docstring&quot;</span><span class="p">:</span> <span class="p">[</span><span class="sa">r</span><span class="s2">&quot;/\*\*(.*?)\*/&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;//\s*(.*?)$&quot;</span><span class="p">],</span>
+            <span class="p">},</span>
+            <span class="s2">&quot;typescript&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;function&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;(?:function\s+(\w+)\s*\()|(?:([\w\.]+)\s*\.\s*(\w+)\s*\()&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;class&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;class\s+(\w+)\s*{&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;docstring&quot;</span><span class="p">:</span> <span class="p">[</span><span class="sa">r</span><span class="s2">&quot;/\*\*(.*?)\*/&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;//\s*(.*?)$&quot;</span><span class="p">],</span>
+            <span class="p">},</span>
+            <span class="s2">&quot;matlab&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;function&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;function\s+(?:.*=\s*)?(\w+)\s*\(&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;class&quot;</span><span class="p">:</span> <span class="sa">r</span><span class="s2">&quot;classdef\s+(\w+)&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;docstring&quot;</span><span class="p">:</span> <span class="p">[</span><span class="sa">r</span><span class="s2">&quot;%\s+(.*?)(?=\n\s*(?:%|\w))&quot;</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;%{(.*?)%}&quot;</span><span class="p">],</span>
+            <span class="p">},</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span> <span class="n">language</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">patterns</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">analysis</span>
+
+        <span class="n">lang_patterns</span> <span class="o">=</span> <span class="n">patterns</span><span class="p">[</span><span class="n">language</span><span class="p">]</span>
+
+        <span class="c1"># Find function/class name</span>
+        <span class="n">func_match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">lang_patterns</span><span class="p">[</span><span class="s2">&quot;function&quot;</span><span class="p">],</span> <span class="n">clean_code</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">)</span>
+        <span class="n">class_match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">lang_patterns</span><span class="p">[</span><span class="s2">&quot;class&quot;</span><span class="p">],</span> <span class="n">clean_code</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">func_match</span><span class="p">:</span>
+            <span class="c1"># For JavaScript/TypeScript, handle method calls like document.addEventListener(</span>
+            <span class="k">if</span> <span class="n">language</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;javascript&quot;</span><span class="p">,</span> <span class="s2">&quot;typescript&quot;</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="n">func_match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>  <span class="c1"># e.g., document.addEventListener(</span>
+                    <span class="n">analysis</span><span class="p">[</span><span class="s2">&quot;function_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">func_match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+                    <span class="n">analysis</span><span class="p">[</span><span class="s2">&quot;block_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;function&quot;</span>
+                <span class="k">elif</span> <span class="n">func_match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">):</span>  <span class="c1"># function foo(</span>
+                    <span class="n">analysis</span><span class="p">[</span><span class="s2">&quot;function_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">func_match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                    <span class="n">analysis</span><span class="p">[</span><span class="s2">&quot;block_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;function&quot;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">analysis</span><span class="p">[</span><span class="s2">&quot;function_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;unknown&quot;</span>
+                    <span class="n">analysis</span><span class="p">[</span><span class="s2">&quot;block_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;function&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">groups</span> <span class="o">=</span> <span class="n">func_match</span><span class="o">.</span><span class="n">groups</span><span class="p">()</span>
+                <span class="n">analysis</span><span class="p">[</span><span class="s2">&quot;function_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">g</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">groups</span> <span class="k">if</span> <span class="n">g</span><span class="p">),</span> <span class="s2">&quot;unknown&quot;</span><span class="p">)</span>
+                <span class="n">analysis</span><span class="p">[</span><span class="s2">&quot;block_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;function&quot;</span>
+        <span class="k">elif</span> <span class="n">class_match</span><span class="p">:</span>
+            <span class="n">groups</span> <span class="o">=</span> <span class="n">class_match</span><span class="o">.</span><span class="n">groups</span><span class="p">()</span>
+            <span class="n">analysis</span><span class="p">[</span><span class="s2">&quot;function_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">g</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">groups</span> <span class="k">if</span> <span class="n">g</span><span class="p">),</span> <span class="s2">&quot;unknown&quot;</span><span class="p">)</span>
+            <span class="n">analysis</span><span class="p">[</span><span class="s2">&quot;block_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;class&quot;</span>
+
+        <span class="c1"># Look for docstring</span>
+        <span class="k">for</span> <span class="n">docstring_pattern</span> <span class="ow">in</span> <span class="n">lang_patterns</span><span class="p">[</span><span class="s2">&quot;docstring&quot;</span><span class="p">]:</span>
+            <span class="n">docstring_match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">docstring_pattern</span><span class="p">,</span> <span class="n">clean_code</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">DOTALL</span> <span class="o">|</span> <span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">docstring_match</span><span class="p">:</span>
+                <span class="n">analysis</span><span class="p">[</span><span class="s2">&quot;docstring_content&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">docstring_match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                <span class="n">analysis</span><span class="p">[</span><span class="s2">&quot;missing_docstring&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">break</span>
+
+        <span class="k">return</span> <span class="n">analysis</span>
+
+    <span class="c1"># Analyze each code block</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">block</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">code_blocks</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="c1"># Extract the actual code (remove header/footer comments)</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">start_line_number</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">code_lines</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;# --- Code Block&quot;</span><span class="p">):</span>
+                <span class="n">code_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+            <span class="k">if</span> <span class="s2">&quot;--- Code Block starts at line&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+                <span class="n">match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;starts at line (\d+)&quot;</span><span class="p">,</span> <span class="n">line</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">match</span><span class="p">:</span>
+                    <span class="n">start_line_number</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">start_line_number</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="n">clean_code</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">code_lines</span><span class="p">)</span>
+        <span class="c1"># language = detect_language(clean_code, file_name)</span>
+
+        <span class="c1"># Analyze based on detected language</span>
+        <span class="k">if</span> <span class="n">language</span> <span class="o">==</span> <span class="s2">&quot;python&quot;</span><span class="p">:</span>
+            <span class="n">block_analysis</span> <span class="o">=</span> <span class="n">analyze_python_block</span><span class="p">(</span><span class="n">clean_code</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">block_analysis</span> <span class="o">=</span> <span class="n">analyze_with_regex</span><span class="p">(</span><span class="n">clean_code</span><span class="p">,</span> <span class="n">language</span><span class="p">)</span>
+
+        <span class="n">block_analysis</span><span class="p">[</span><span class="s2">&quot;block_number&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span>
+        <span class="n">block_analysis</span><span class="p">[</span><span class="s2">&quot;language&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">language</span>
+        <span class="n">block_analysis</span><span class="p">[</span><span class="s2">&quot;line_number&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">start_line_number</span> <span class="k">if</span> <span class="n">start_line_number</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">0</span>
+
+        <span class="c1"># Update counters</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">block_analysis</span><span class="p">[</span><span class="s2">&quot;missing_docstring&quot;</span><span class="p">]:</span>
+            <span class="n">results</span><span class="p">[</span><span class="s2">&quot;blocks_with_docstring&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">results</span><span class="p">[</span><span class="s2">&quot;blocks_without_docstring&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">generated_docstring</span> <span class="o">=</span> <span class="n">generate_docstring_with_openai</span><span class="p">(</span><span class="n">clean_code</span><span class="p">,</span> <span class="n">language</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">generated_docstring</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Generated Docstring:&quot;</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">format_docstring_for_language</span><span class="p">(</span><span class="n">generated_docstring</span><span class="p">,</span> <span class="n">language</span><span class="p">))</span>
+                <span class="c1"># Save the generated docstring to a suggested docstring file</span>
+                <span class="n">output_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))),</span> <span class="s2">&quot;files&quot;</span>
+                <span class="p">)</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">output_dir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">suggested_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_dir</span><span class="p">,</span> <span class="s2">&quot;suggested_docstring.txt&quot;</span><span class="p">)</span>
+                <span class="c1"># suggested_file = f&quot;suggested_docstring&quot;</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">suggested_file</span><span class="p">,</span> <span class="s2">&quot;a&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                    <span class="c1"># Add a column with filename, file path, function name, and line number</span>
+                    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+                        <span class="s2">&quot;</span><span class="se">\n</span><span class="s2"># File: &quot;</span>
+                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">file_name</span><span class="si">}</span><span class="s2">, Path: </span><span class="si">{</span><span class="n">file_path</span><span class="si">}</span><span class="s2">, Function: &quot;</span>
+                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">block_analysis</span><span class="p">[</span><span class="s1">&#39;function_name&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">, Line: &quot;</span>
+                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">block_analysis</span><span class="p">[</span><span class="s1">&#39;line_number&#39;</span><span class="p">]</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="p">)</span>
+                    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="si">{</span><span class="n">format_docstring_for_language</span><span class="p">(</span><span class="n">generated_docstring</span><span class="p">,</span><span class="w"> </span><span class="n">language</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="si">{</span><span class="s1">&#39;-&#39;</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">100</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Docstring generation failed.&quot;</span><span class="p">)</span>
+
+        <span class="n">results</span><span class="p">[</span><span class="s2">&quot;docstring_analysis&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">block_analysis</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">results</span></div>
+
+
+
+<div class="viewcode-block" id="analyze_docstring_in_module">
+<a class="viewcode-back" href="../../../autoapi/src/utils/docstring_validation/index.html#src.utils.docstring_validation.analyze_docstring_in_module">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">analyze_docstring_in_module</span><span class="p">(</span><span class="n">content</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">language</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extract module-level docstring from file content.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        content (str): The file content</span>
+<span class="sd">        language (str): The programming language</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str or None: The module docstring if found, None otherwise</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">language</span> <span class="o">==</span> <span class="s2">&quot;python&quot;</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Parse the Python code using AST</span>
+            <span class="n">tree</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+            <span class="c1"># Get the first statement if it&#39;s a string literal</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="n">tree</span><span class="o">.</span><span class="n">body</span>
+                <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">body</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">ast</span><span class="o">.</span><span class="n">Expr</span><span class="p">)</span>
+                <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">body</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">ast</span><span class="o">.</span><span class="n">Constant</span><span class="p">)</span>
+                <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tree</span><span class="o">.</span><span class="n">body</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+            <span class="p">):</span>
+                <span class="k">return</span> <span class="n">tree</span><span class="o">.</span><span class="n">body</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">SyntaxError</span><span class="p">:</span>
+            <span class="c1"># If AST parsing fails, try regex fallback</span>
+            <span class="k">pass</span>
+
+        <span class="c1"># Fallback regex method for Python</span>
+        <span class="n">pattern</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;^[\s]*[&quot;</span><span class="se">\&#39;</span><span class="s1">][\&quot;</span><span class="se">\&#39;</span><span class="s1">][\&quot;</span><span class="se">\&#39;</span><span class="s1">]([^&quot;</span><span class="se">\&#39;</span><span class="s1">]*?)[\&quot;</span><span class="se">\&#39;</span><span class="s1">][\&quot;</span><span class="se">\&#39;</span><span class="s1">][\&quot;</span><span class="se">\&#39;</span><span class="s1">]|^[\s]*[&quot;</span><span class="se">\&#39;</span><span class="s1">]([^&quot;</span><span class="se">\&#39;</span><span class="s1">]*?)[&quot;</span><span class="se">\&#39;</span><span class="s1">]&#39;</span>
+        <span class="n">match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">content</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span> <span class="o">|</span> <span class="n">re</span><span class="o">.</span><span class="n">DOTALL</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">match</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="ow">or</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+    <span class="k">elif</span> <span class="n">language</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;javascript&quot;</span><span class="p">,</span> <span class="s2">&quot;typescript&quot;</span><span class="p">]:</span>
+        <span class="c1"># Look for JSDoc style comments at the beginning</span>
+        <span class="n">pattern</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;^\s*/\*\*\s*\n(.*?)\n\s*\*/&quot;</span>
+        <span class="n">match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">content</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span> <span class="o">|</span> <span class="n">re</span><span class="o">.</span><span class="n">DOTALL</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">match</span><span class="p">:</span>
+            <span class="c1"># Clean up the JSDoc comment</span>
+            <span class="n">docstring</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">lines</span> <span class="o">=</span> <span class="n">docstring</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">cleaned_lines</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+                <span class="n">line</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;^\s*\*\s?&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">line</span><span class="p">)</span>
+                <span class="n">cleaned_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+            <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cleaned_lines</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+    <span class="k">elif</span> <span class="n">language</span> <span class="o">==</span> <span class="s2">&quot;matlab&quot;</span><span class="p">:</span>
+        <span class="c1"># Look for MATLAB style comments at the beginning</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="n">content</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">docstring_lines</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;%&quot;</span><span class="p">):</span>
+                <span class="n">docstring_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+            <span class="k">elif</span> <span class="n">line</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;%&quot;</span><span class="p">):</span>
+                <span class="k">break</span>
+        <span class="k">if</span> <span class="n">docstring_lines</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">docstring_lines</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="kc">None</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Auto Doc Team.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

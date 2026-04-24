@@ -1,0 +1,25 @@
+src
+===
+
+.. py:module:: src
+
+.. autoapi-nested-parse::
+
+   Auto Docs application package.
+
+
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   /autoapi/src/config/index
+   /autoapi/src/main/index
+   /autoapi/src/models/index
+   /autoapi/src/router/index
+   /autoapi/src/services/index
+   /autoapi/src/utils/index
+
+

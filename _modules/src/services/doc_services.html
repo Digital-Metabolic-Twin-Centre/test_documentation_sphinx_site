@@ -1,0 +1,334 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>src.services.doc_services &mdash; Auto Docs</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=01f3b618" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/fonts.css?v=5583d106" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=01f3b618" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Auto Docs
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Guides</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting-started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api-guide.html">API Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../architecture.html">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../outputs.html">Outputs and Reports</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../autoapi/index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Auto Docs</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">src.services.doc_services</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for src.services.doc_services</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">config.log_config</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">utils.code_block_extraction</span><span class="w"> </span><span class="kn">import</span> <span class="n">GenericCodeBlockExtractor</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">utils.docstring_generation</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">format_docstring_for_language</span><span class="p">,</span>
+    <span class="n">generate_docstring_with_openai</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">utils.docstring_validation</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">analyze_docstring_in_blocks</span><span class="p">,</span>
+    <span class="n">analyze_docstring_in_module</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">utils.git_utils</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">extract_repo_path</span><span class="p">,</span>
+    <span class="n">fetch_content_from_github</span><span class="p">,</span>
+    <span class="n">fetch_content_from_gitlab</span><span class="p">,</span>
+    <span class="n">fetch_repo_tree</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="analyze_repo">
+<a class="viewcode-back" href="../../../autoapi/src/services/doc_services/index.html#src.services.doc_services.analyze_repo">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">analyze_repo</span><span class="p">(</span><span class="n">provider</span><span class="p">,</span> <span class="n">repo_url</span><span class="p">,</span> <span class="n">token</span><span class="p">,</span> <span class="n">branch</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Analyze a repository for Python files missing docstring.</span>
+
+<span class="sd">    Description:</span>
+<span class="sd">        This function fetches the repository tree, detects the tech stack, and checks each file</span>
+<span class="sd">        for missing or present docstring. It returns lists of files and items</span>
+<span class="sd">        missing docstring and those with docstring.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        provider (str): The git provider name (e.g., &#39;github&#39;, &#39;gitlab&#39;).</span>
+<span class="sd">        repo_url (str): The URL of the repository.</span>
+<span class="sd">        token (str): The authentication token for accessing the repository.</span>
+<span class="sd">        branch (str): The branch name to analyze.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        tuple:</span>
+<span class="sd">            - files_missing_docstring (list): List of dicts for files/items missing docstring.</span>
+<span class="sd">            - file_present_docstring (list): List of dicts for files/items with docstring.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">block_analysis_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Analyzing repo: provider=</span><span class="si">{</span><span class="n">provider</span><span class="si">}</span><span class="s2">, url=</span><span class="si">{</span><span class="n">repo_url</span><span class="si">}</span><span class="s2">, branch=</span><span class="si">{</span><span class="n">branch</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Extract repo path from URL</span>
+    <span class="n">repo_path</span> <span class="o">=</span> <span class="n">extract_repo_path</span><span class="p">(</span><span class="n">repo_url</span><span class="p">,</span> <span class="n">provider</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Extracted repo path: </span><span class="si">{</span><span class="n">repo_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># delete the suggested docstring file and block analysis file if it exists</span>
+    <span class="n">output_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))),</span> <span class="s2">&quot;files&quot;</span><span class="p">)</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">output_dir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">suggested_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_dir</span><span class="p">,</span> <span class="s2">&quot;suggested_docstring.txt&quot;</span><span class="p">)</span>
+    <span class="n">block_analysis_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_dir</span><span class="p">,</span> <span class="s2">&quot;block_analysis.csv&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">suggested_file</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">suggested_file</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Deleted </span><span class="si">{</span><span class="n">suggested_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">block_analysis_file</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">block_analysis_file</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Deleted </span><span class="si">{</span><span class="n">block_analysis_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Fetch repo tree</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">file_list</span> <span class="o">=</span> <span class="n">fetch_repo_tree</span><span class="p">(</span><span class="n">repo_path</span><span class="p">,</span> <span class="n">token</span><span class="p">,</span> <span class="n">branch</span><span class="o">=</span><span class="n">branch</span><span class="p">,</span> <span class="n">provider</span><span class="o">=</span><span class="n">provider</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Fetched repo tree, </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">file_list</span><span class="p">)</span><span class="si">}</span><span class="s2"> files found.&quot;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error fetching repo tree: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">raise</span>
+    <span class="c1"># tech = detect_tech_stack(file_list)</span>
+
+    <span class="c1"># Determine file type key for provider</span>
+    <span class="n">file_type_key</span> <span class="o">=</span> <span class="s2">&quot;blob&quot;</span> <span class="k">if</span> <span class="n">provider</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;gitlab&quot;</span> <span class="k">else</span> <span class="s2">&quot;file&quot;</span>
+
+    <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">file_list</span><span class="p">:</span>
+        <span class="c1"># To make sure item is a file not a directory</span>
+        <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">!=</span> <span class="n">file_type_key</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">file_name</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="n">language</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">((</span><span class="s2">&quot;.py&quot;</span><span class="p">,</span> <span class="s2">&quot;.pyw&quot;</span><span class="p">)):</span>
+            <span class="n">language</span> <span class="o">=</span> <span class="s2">&quot;python&quot;</span>
+        <span class="k">elif</span> <span class="n">file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">((</span><span class="s2">&quot;.js&quot;</span><span class="p">,</span> <span class="s2">&quot;.jsx&quot;</span><span class="p">)):</span>
+            <span class="n">language</span> <span class="o">=</span> <span class="s2">&quot;javascript&quot;</span>
+        <span class="k">elif</span> <span class="n">file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">((</span><span class="s2">&quot;.ts&quot;</span><span class="p">,</span> <span class="s2">&quot;.tsx&quot;</span><span class="p">)):</span>
+            <span class="n">language</span> <span class="o">=</span> <span class="s2">&quot;typescript&quot;</span>
+        <span class="k">elif</span> <span class="n">file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">((</span><span class="s2">&quot;.m&quot;</span><span class="p">,</span> <span class="s2">&quot;.mat&quot;</span><span class="p">)):</span>
+            <span class="n">language</span> <span class="o">=</span> <span class="s2">&quot;matlab&quot;</span>
+        <span class="c1"># File type not supported</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;File </span><span class="si">{</span><span class="n">file_name</span><span class="si">}</span><span class="s2"> is not supported for docstring validation. Skipping...&quot;</span>
+            <span class="p">)</span>
+            <span class="k">continue</span>
+        <span class="n">file_path</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;path&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+        <span class="c1"># fetch content based on provider</span>
+        <span class="k">if</span> <span class="n">provider</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;github&quot;</span><span class="p">:</span>
+            <span class="n">content</span> <span class="o">=</span> <span class="n">fetch_content_from_github</span><span class="p">(</span><span class="n">repo_path</span><span class="p">,</span> <span class="n">branch</span><span class="p">,</span> <span class="n">file_path</span><span class="p">,</span> <span class="n">token</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">provider</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;gitlab&quot;</span><span class="p">:</span>
+            <span class="n">content</span> <span class="o">=</span> <span class="n">fetch_content_from_gitlab</span><span class="p">(</span><span class="n">repo_path</span><span class="p">,</span> <span class="n">branch</span><span class="p">,</span> <span class="n">file_path</span><span class="p">,</span> <span class="n">token</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">content</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">content</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">content</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Empty file </span><span class="si">{</span><span class="n">file_name</span><span class="si">}</span><span class="s2">. Cannot validate docstring.&quot;</span><span class="p">)</span>
+            <span class="k">continue</span>
+
+        <span class="c1"># Create a code blocks in the file to analyze</span>
+        <span class="n">extractor</span> <span class="o">=</span> <span class="n">GenericCodeBlockExtractor</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="n">file_name</span><span class="p">)</span>
+        <span class="n">code_blocks</span> <span class="o">=</span> <span class="n">extractor</span><span class="o">.</span><span class="n">code_block_extractor</span><span class="p">()</span>
+        <span class="c1"># If no code blocks found, check for module-level docstring</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">code_blocks</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;No code blocks found in </span><span class="si">{</span><span class="n">file_name</span><span class="si">}</span><span class="s2">. Checking for module-level docstring...&quot;</span>
+            <span class="p">)</span>
+            <span class="n">module_docstring</span> <span class="o">=</span> <span class="n">analyze_docstring_in_module</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="n">language</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">module_docstring</span><span class="p">:</span>
+                <span class="n">block_analysis</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s2">&quot;file_name&quot;</span><span class="p">:</span> <span class="n">file_name</span><span class="p">,</span>
+                    <span class="s2">&quot;file_path&quot;</span><span class="p">:</span> <span class="n">file_path</span><span class="p">,</span>
+                    <span class="s2">&quot;total_blocks&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                    <span class="s2">&quot;blocks_with_docstring&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                    <span class="s2">&quot;blocks_without_docstring&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="s2">&quot;docstring_analysis&quot;</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="p">{</span>
+                            <span class="s2">&quot;function_name&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Module: </span><span class="si">{</span><span class="n">file_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                            <span class="s2">&quot;block_type&quot;</span><span class="p">:</span> <span class="s2">&quot;module&quot;</span><span class="p">,</span>
+                            <span class="s2">&quot;docstring_content&quot;</span><span class="p">:</span> <span class="n">module_docstring</span><span class="p">,</span>
+                            <span class="s2">&quot;missing_docstring&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+                            <span class="s2">&quot;block_number&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                            <span class="s2">&quot;language&quot;</span><span class="p">:</span> <span class="n">language</span><span class="p">,</span>
+                            <span class="s2">&quot;line_number&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                        <span class="p">}</span>
+                    <span class="p">],</span>
+                <span class="p">}</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># No module docstring found either</span>
+                <span class="n">block_analysis</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s2">&quot;file_name&quot;</span><span class="p">:</span> <span class="n">file_name</span><span class="p">,</span>
+                    <span class="s2">&quot;file_path&quot;</span><span class="p">:</span> <span class="n">file_path</span><span class="p">,</span>
+                    <span class="s2">&quot;total_blocks&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                    <span class="s2">&quot;blocks_with_docstring&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                    <span class="s2">&quot;blocks_without_docstring&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                    <span class="s2">&quot;docstring_analysis&quot;</span><span class="p">:</span> <span class="p">[</span>
+                        <span class="p">{</span>
+                            <span class="s2">&quot;function_name&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Module: </span><span class="si">{</span><span class="n">file_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                            <span class="s2">&quot;block_type&quot;</span><span class="p">:</span> <span class="s2">&quot;module&quot;</span><span class="p">,</span>
+                            <span class="s2">&quot;docstring_content&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                            <span class="s2">&quot;missing_docstring&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                            <span class="s2">&quot;block_number&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                            <span class="s2">&quot;language&quot;</span><span class="p">:</span> <span class="n">language</span><span class="p">,</span>
+                            <span class="s2">&quot;line_number&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+                        <span class="p">}</span>
+                    <span class="p">],</span>
+                <span class="p">}</span>
+                <span class="n">generated_docstring</span> <span class="o">=</span> <span class="n">generate_docstring_with_openai</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="n">language</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">generated_docstring</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Generated Docstring:&quot;</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">format_docstring_for_language</span><span class="p">(</span><span class="n">generated_docstring</span><span class="p">,</span> <span class="n">language</span><span class="p">))</span>
+                    <span class="n">suggested_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_dir</span><span class="p">,</span> <span class="s2">&quot;suggested_docstring.txt&quot;</span><span class="p">)</span>
+                    <span class="n">doc_info</span> <span class="o">=</span> <span class="n">block_analysis</span><span class="p">[</span><span class="s2">&quot;docstring_analysis&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">suggested_file</span><span class="p">,</span> <span class="s2">&quot;a&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+                            <span class="s2">&quot;</span><span class="se">\n</span><span class="s2"># File: &quot;</span>
+                            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">file_name</span><span class="si">}</span><span class="s2">, Path: </span><span class="si">{</span><span class="n">file_path</span><span class="si">}</span><span class="s2">, Function: &quot;</span>
+                            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">doc_info</span><span class="p">[</span><span class="s1">&#39;function_name&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">, Line: </span><span class="si">{</span><span class="n">doc_info</span><span class="p">[</span><span class="s1">&#39;line_number&#39;</span><span class="p">]</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+                        <span class="p">)</span>
+                        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">format_docstring_for_language</span><span class="p">(</span><span class="n">generated_docstring</span><span class="p">,</span><span class="w"> </span><span class="n">language</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+                        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;-&#39;</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">100</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Docstring generation failed.&quot;</span><span class="p">)</span>
+
+            <span class="n">block_analysis_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">block_analysis</span><span class="p">)</span>
+            <span class="k">continue</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Analyzing </span><span class="si">{</span><span class="n">file_name</span><span class="si">}</span><span class="s2"> with </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">code_blocks</span><span class="p">)</span><span class="si">}</span><span class="s2"> code blocks.&quot;</span><span class="p">)</span>
+        <span class="n">block_analysis</span> <span class="o">=</span> <span class="n">analyze_docstring_in_blocks</span><span class="p">(</span>
+            <span class="n">code_blocks</span><span class="p">,</span> <span class="n">file_name</span><span class="o">=</span><span class="n">file_name</span><span class="p">,</span> <span class="n">file_path</span><span class="o">=</span><span class="n">file_path</span><span class="p">,</span> <span class="n">language</span><span class="o">=</span><span class="n">language</span>
+        <span class="p">)</span>
+        <span class="n">block_analysis_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">block_analysis</span><span class="p">)</span>
+
+    <span class="c1"># save details in csv</span>
+    <span class="n">output_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">output_dir</span><span class="p">,</span> <span class="s2">&quot;block_analysis.csv&quot;</span><span class="p">)</span>
+
+    <span class="c1"># save details in csv</span>
+    <span class="n">flattened_data</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">block_analysis</span> <span class="ow">in</span> <span class="n">block_analysis_list</span><span class="p">:</span>
+        <span class="c1"># Extract main keys</span>
+        <span class="n">file_name</span> <span class="o">=</span> <span class="n">block_analysis</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;file_name&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="n">file_path</span> <span class="o">=</span> <span class="n">block_analysis</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;file_path&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Extract nested dictionary data from docstring_analysis</span>
+        <span class="n">docstring_analysis</span> <span class="o">=</span> <span class="n">block_analysis</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;docstring_analysis&quot;</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="k">for</span> <span class="n">analysis</span> <span class="ow">in</span> <span class="n">docstring_analysis</span><span class="p">:</span>
+            <span class="n">row</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;file_name&quot;</span><span class="p">:</span> <span class="n">file_name</span><span class="p">,</span>
+                <span class="s2">&quot;file_path&quot;</span><span class="p">:</span> <span class="n">file_path</span><span class="p">,</span>
+                <span class="s2">&quot;function_name&quot;</span><span class="p">:</span> <span class="n">analysis</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;function_name&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
+                <span class="s2">&quot;block_type&quot;</span><span class="p">:</span> <span class="n">analysis</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;block_type&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
+                <span class="s2">&quot;missing_docstring&quot;</span><span class="p">:</span> <span class="n">analysis</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;missing_docstring&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
+                <span class="s2">&quot;language&quot;</span><span class="p">:</span> <span class="n">analysis</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;language&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
+                <span class="s2">&quot;line_number&quot;</span><span class="p">:</span> <span class="n">analysis</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;line_number&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+            <span class="p">}</span>
+            <span class="n">flattened_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+
+    <span class="c1"># Create DataFrame with proper columns (empty if no data)</span>
+    <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;file_name&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;file_path&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;function_name&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;block_type&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;missing_docstring&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;language&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;line_number&quot;</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">flattened_data</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">columns</span><span class="p">)</span>
+    <span class="n">df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">output_path</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">block_analysis_list</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No files with docstring analysis found.&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">output_path</span><span class="p">,</span> <span class="n">block_analysis_list</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Auto Doc Team.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

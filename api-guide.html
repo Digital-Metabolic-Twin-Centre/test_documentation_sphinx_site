@@ -1,0 +1,188 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>API Guide &mdash; Auto Docs</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="_static/custom.css?v=01f3b618" />
+      <link rel="stylesheet" type="text/css" href="_static/fonts.css?v=5583d106" />
+      <link rel="stylesheet" type="text/css" href="_static/custom.css?v=01f3b618" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Architecture" href="architecture.html" />
+    <link rel="prev" title="Getting Started" href="getting-started.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Auto Docs
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Guides</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting Started</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">API Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="architecture.html">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="outputs.html">Outputs and Reports</a></li>
+<li class="toctree-l1"><a class="reference internal" href="autoapi/index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Auto Docs</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">API Guide</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="api-guide">
+<h1>API Guide<a class="headerlink" href="#api-guide" title="Link to this heading"></a></h1>
+<section class="callout-band">
+  <p class="eyebrow">Interface</p>
+  <p>
+    The HTTP surface is intentionally small: one health-style entry point and one
+    repository analysis endpoint that drives the documentation workflow.
+  </p>
+</section><section id="root-endpoint">
+<h2>Root endpoint<a class="headerlink" href="#root-endpoint" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">GET</span> <span class="pre">/</span></code></p>
+<p>Returns a simple welcome message and confirms the service is running.</p>
+</section>
+<section id="generate-endpoint">
+<h2>Generate endpoint<a class="headerlink" href="#generate-endpoint" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">POST</span> <span class="pre">/generate</span></code></p>
+<p>This endpoint analyzes a repository, writes docstring analysis outputs, and attempts
+to prepare Sphinx documentation setup for the target repository.</p>
+</section>
+<section id="request-body">
+<h2>Request body<a class="headerlink" href="#request-body" title="Link to this heading"></a></h2>
+<p>The request model includes:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">provider</span></code>: <code class="docutils literal notranslate"><span class="pre">github</span></code> or <code class="docutils literal notranslate"><span class="pre">gitlab</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">repo_url</span></code>: repository URL or provider path such as <code class="docutils literal notranslate"><span class="pre">owner/repo</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">token</span></code>: access token for reading the target repository</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">branch</span></code>: branch to inspect and update</p></li>
+</ul>
+</section>
+<section id="example-request">
+<h2>Example request<a class="headerlink" href="#example-request" title="Link to this heading"></a></h2>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;provider&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;github&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;repo_url&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;owner/repository&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;token&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;your-access-token&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;branch&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;main&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="successful-response">
+<h2>Successful response<a class="headerlink" href="#successful-response" title="Link to this heading"></a></h2>
+<p>The endpoint returns:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">status</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">sphinx_setup_created</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Docstring_analysis</span></code></p></li>
+</ul>
+</section>
+<section id="error-conditions">
+<h2>Error conditions<a class="headerlink" href="#error-conditions" title="Link to this heading"></a></h2>
+<p>Common response failures include:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">400</span></code> for missing required request fields</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">403</span></code> for repository write or branch protection issues</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">404</span></code> when no analyzable files are found</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">422</span></code> for validation-related failures</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">500</span></code> for unexpected runtime errors</p></li>
+</ul>
+<section class="card-grid">
+  <article class="card">
+    <p class="eyebrow">Input</p>
+    <h3>Repository access details</h3>
+    <p>Provide the git provider, repository path or URL, an access token, and the target branch.</p>
+  </article>
+  <article class="card">
+    <p class="eyebrow">Processing</p>
+    <h3>Repository analysis first</h3>
+    <p>The service validates files, identifies documentation gaps, and writes local analysis artifacts.</p>
+  </article>
+  <article class="card">
+    <p class="eyebrow">Output</p>
+    <h3>Sphinx setup as a follow-on step</h3>
+    <p>If coverage thresholds are met and permissions allow, the service prepares documentation workflow files.</p>
+  </article>
+</section></section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="getting-started.html" class="btn btn-neutral float-left" title="Getting Started" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="architecture.html" class="btn btn-neutral float-right" title="Architecture" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Auto Doc Team.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

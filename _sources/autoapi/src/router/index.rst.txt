@@ -1,0 +1,20 @@
+src.router
+==========
+
+.. py:module:: src.router
+
+.. autoapi-nested-parse::
+
+   API routing package.
+
+
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   /autoapi/src/router/router/index
+
+

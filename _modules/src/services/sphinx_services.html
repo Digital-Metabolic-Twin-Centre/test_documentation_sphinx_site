@@ -1,0 +1,319 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>src.services.sphinx_services &mdash; Auto Docs</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=01f3b618" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/fonts.css?v=5583d106" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=01f3b618" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            Auto Docs
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Guides</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting-started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api-guide.html">API Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../architecture.html">Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../outputs.html">Outputs and Reports</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../autoapi/index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Auto Docs</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">src.services.sphinx_services</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for src.services.sphinx_services</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">urllib</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">config.config</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">AUTOAPI_DIRECTORY</span><span class="p">,</span>
+    <span class="n">BUILD_DIR</span><span class="p">,</span>
+    <span class="n">CONF_PY</span><span class="p">,</span>
+    <span class="n">CONFIGURATION_UPDATE_FILE</span><span class="p">,</span>
+    <span class="n">DOCS_SRC</span><span class="p">,</span>
+    <span class="n">GITHUB_ACTIONS_FILE</span><span class="p">,</span>
+    <span class="n">GITLAB_API_URL</span><span class="p">,</span>
+    <span class="n">GITLAB_YML_FILE</span><span class="p">,</span>
+    <span class="n">PIPELINE_EMAIL</span><span class="p">,</span>
+    <span class="n">PIPELINE_USERNAME</span><span class="p">,</span>
+    <span class="n">PROJECT_AUTHOR</span><span class="p">,</span>
+    <span class="n">PROJECT_NAME</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">config.log_config</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_logger</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">utils.generate_yml_content</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">generate_github_actions_file</span><span class="p">,</span>
+    <span class="n">generate_gitlab_ci_file</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">utils.git_utils</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">create_a_file</span><span class="p">,</span>
+    <span class="n">create_directory_and_add_files</span><span class="p">,</span>
+    <span class="n">extract_repo_path</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="create_sphinx_setup">
+<a class="viewcode-back" href="../../../autoapi/src/services/sphinx_services/index.html#src.services.sphinx_services.create_sphinx_setup">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_sphinx_setup</span><span class="p">(</span><span class="n">provider</span><span class="p">,</span> <span class="n">repo_url</span><span class="p">,</span> <span class="n">token</span><span class="p">,</span> <span class="n">branch</span><span class="p">,</span> <span class="n">docstring_analysis_file</span><span class="p">):</span>
+
+    <span class="c1"># Extract repo path from URL</span>
+    <span class="n">repo_path</span> <span class="o">=</span> <span class="n">extract_repo_path</span><span class="p">(</span><span class="n">repo_url</span><span class="p">,</span> <span class="n">provider</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Extracted repo path: </span><span class="si">{</span><span class="n">repo_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># FETCH FILES WITH COMPLETE OR HIGH DOCSTRING COVERAGE</span>
+    <span class="n">DOCSTRING_THRESHOLD</span> <span class="o">=</span> <span class="mf">0.75</span>  <span class="c1"># 75% threshold for including files</span>
+    <span class="n">files_with_all_docstrings</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">files_with_high_coverage</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">docstring_analysis_file</span><span class="p">)</span>
+
+    <span class="c1"># Handle empty dataframe</span>
+    <span class="k">if</span> <span class="n">df</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No files to analyze. Docstring analysis file is empty.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">for</span> <span class="n">file_path</span><span class="p">,</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">&quot;file_path&quot;</span><span class="p">):</span>
+        <span class="n">total</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">group</span><span class="p">)</span>
+        <span class="n">with_docs</span> <span class="o">=</span> <span class="p">(</span><span class="o">~</span><span class="n">group</span><span class="p">[</span><span class="s2">&quot;missing_docstring&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+        <span class="n">coverage</span> <span class="o">=</span> <span class="n">with_docs</span> <span class="o">/</span> <span class="n">total</span> <span class="k">if</span> <span class="n">total</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">0</span>
+
+        <span class="k">if</span> <span class="n">coverage</span> <span class="o">==</span> <span class="mf">1.0</span><span class="p">:</span>
+            <span class="n">files_with_all_docstrings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">coverage</span> <span class="o">&gt;=</span> <span class="n">DOCSTRING_THRESHOLD</span><span class="p">:</span>
+            <span class="n">files_with_high_coverage</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+
+    <span class="c1"># Combine files with 100% and high coverage</span>
+    <span class="n">files_to_document</span> <span class="o">=</span> <span class="n">files_with_all_docstrings</span> <span class="o">+</span> <span class="n">files_with_high_coverage</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+        <span class="s2">&quot;Files with 100</span><span class="si">%%</span><span class="s2"> docstrings (</span><span class="si">%s</span><span class="s2">): </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="nb">len</span><span class="p">(</span><span class="n">files_with_all_docstrings</span><span class="p">),</span>
+        <span class="n">files_with_all_docstrings</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+        <span class="s2">&quot;Files with ≥</span><span class="si">%.0f%%</span><span class="s2"> docstrings (</span><span class="si">%s</span><span class="s2">): </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span>
+        <span class="n">DOCSTRING_THRESHOLD</span> <span class="o">*</span> <span class="mi">100</span><span class="p">,</span>
+        <span class="nb">len</span><span class="p">(</span><span class="n">files_with_high_coverage</span><span class="p">),</span>
+        <span class="n">files_with_high_coverage</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Total files to document: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">files_to_document</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Skip directory creation if no files meet criteria</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">files_to_document</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+            <span class="s2">&quot;No files with ≥</span><span class="si">%.0f%%</span><span class="s2"> docstring coverage found. &quot;</span>
+            <span class="s2">&quot;Skipping Sphinx setup.&quot;</span><span class="p">,</span>
+            <span class="n">DOCSTRING_THRESHOLD</span> <span class="o">*</span> <span class="mi">100</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="c1"># CREATE DIRECTORY AND ADD FILES WITH ADEQUATE DOCSTRING COVERAGE</span>
+    <span class="nb">dir</span> <span class="o">=</span> <span class="n">create_directory_and_add_files</span><span class="p">(</span>
+        <span class="n">repo_path</span><span class="p">,</span> <span class="n">AUTOAPI_DIRECTORY</span><span class="p">,</span> <span class="n">files_to_document</span><span class="p">,</span> <span class="n">branch</span><span class="p">,</span> <span class="n">token</span><span class="p">,</span> <span class="n">provider</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">dir</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Directory creation failed.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="c1"># CREATE A FILE TO UPDATE CONF.PY FILE FOR SPHINX AUTOAPI</span>
+    <span class="n">conf_file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s2">&quot;..&quot;</span><span class="p">,</span> <span class="s2">&quot;utils&quot;</span><span class="p">,</span> <span class="s2">&quot;update_conf_content.py&quot;</span>
+    <span class="p">)</span>
+    <span class="n">conf_file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">conf_file_path</span><span class="p">)</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">conf_file_path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">conf_content</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+    <span class="n">config_file_created</span> <span class="o">=</span> <span class="n">create_a_file</span><span class="p">(</span>
+        <span class="n">repo_path</span><span class="p">,</span> <span class="n">branch</span><span class="p">,</span> <span class="n">CONFIGURATION_UPDATE_FILE</span><span class="p">,</span> <span class="n">conf_content</span><span class="p">,</span> <span class="n">token</span><span class="p">,</span> <span class="n">provider</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">config_file_created</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">CONFIGURATION_UPDATE_FILE</span><span class="si">}</span><span class="s2"> file creation failed.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">if</span> <span class="n">provider</span> <span class="o">==</span> <span class="s2">&quot;gitlab&quot;</span><span class="p">:</span>
+        <span class="c1"># CREATE A .gitlab-ci.yml FILE</span>
+        <span class="n">gitlab_ci_content</span> <span class="o">=</span> <span class="n">generate_gitlab_ci_file</span><span class="p">()</span>
+        <span class="n">yml_file_created</span> <span class="o">=</span> <span class="n">create_a_file</span><span class="p">(</span>
+            <span class="n">repo_path</span><span class="p">,</span> <span class="n">branch</span><span class="p">,</span> <span class="n">GITLAB_YML_FILE</span><span class="p">,</span> <span class="n">gitlab_ci_content</span><span class="p">,</span> <span class="n">token</span><span class="p">,</span> <span class="n">provider</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">yml_file_created</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">GITLAB_YML_FILE</span><span class="si">}</span><span class="s2"> file creation failed.&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">GITLAB_YML_FILE</span><span class="si">}</span><span class="s2"> file created successfully.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Trigger GitLab pipeline (optional)</span>
+        <span class="n">variables</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;DOCS_SRC&quot;</span><span class="p">:</span> <span class="n">DOCS_SRC</span><span class="p">,</span>
+            <span class="s2">&quot;BUILD_DIR&quot;</span><span class="p">:</span> <span class="n">BUILD_DIR</span><span class="p">,</span>
+            <span class="s2">&quot;CONF_PY&quot;</span><span class="p">:</span> <span class="n">CONF_PY</span><span class="p">,</span>
+            <span class="s2">&quot;PROJECT_NAME&quot;</span><span class="p">:</span> <span class="n">PROJECT_NAME</span><span class="p">,</span>
+            <span class="s2">&quot;PROJECT_AUTHOR&quot;</span><span class="p">:</span> <span class="n">PROJECT_AUTHOR</span><span class="p">,</span>
+            <span class="s2">&quot;GIT_USER_EMAIL&quot;</span><span class="p">:</span> <span class="n">PIPELINE_EMAIL</span><span class="p">,</span>
+            <span class="s2">&quot;GIT_USER_NAME&quot;</span><span class="p">:</span> <span class="n">PIPELINE_USERNAME</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="n">success</span> <span class="o">=</span> <span class="n">trigger_gitlab_pipeline</span><span class="p">(</span><span class="n">repo_path</span><span class="p">,</span> <span class="n">branch</span><span class="p">,</span> <span class="n">token</span><span class="p">,</span> <span class="n">variables</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">success</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;GitLab pipeline trigger failed. Pipeline must be triggered &quot;</span>
+                <span class="s2">&quot;manually or CI_TRIGGER_PIPELINE_TOKEN environment variable &quot;</span>
+                <span class="s2">&quot;is not set.&quot;</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Pipeline triggered successfully!&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Return True since Sphinx setup files were created successfully</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">if</span> <span class="n">provider</span> <span class="o">==</span> <span class="s2">&quot;github&quot;</span><span class="p">:</span>
+        <span class="n">github_actions_content</span> <span class="o">=</span> <span class="n">generate_github_actions_file</span><span class="p">()</span>
+        <span class="n">workflow_file_created</span> <span class="o">=</span> <span class="n">create_a_file</span><span class="p">(</span>
+            <span class="n">repo_path</span><span class="p">,</span>
+            <span class="n">branch</span><span class="p">,</span>
+            <span class="n">GITHUB_ACTIONS_FILE</span><span class="p">,</span>
+            <span class="n">github_actions_content</span><span class="p">,</span>
+            <span class="n">token</span><span class="p">,</span>
+            <span class="n">provider</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">workflow_file_created</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">GITHUB_ACTIONS_FILE</span><span class="si">}</span><span class="s2"> file creation failed.&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">GITHUB_ACTIONS_FILE</span><span class="si">}</span><span class="s2"> file created successfully.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unsupported provider for Sphinx setup: </span><span class="si">{</span><span class="n">provider</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="kc">False</span></div>
+
+
+
+<div class="viewcode-block" id="trigger_gitlab_pipeline">
+<a class="viewcode-back" href="../../../autoapi/src/services/sphinx_services/index.html#src.services.sphinx_services.trigger_gitlab_pipeline">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">trigger_gitlab_pipeline</span><span class="p">(</span><span class="n">repo_url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">branch</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">token</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">variables</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Triggers a GitLab pipeline for the given project and branch.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        repo_url (str): The GitLab project path (e.g., &#39;namespace/project&#39;).</span>
+<span class="sd">        branch (str): The branch to trigger the pipeline on.</span>
+<span class="sd">        token (str): GitLab private token.</span>
+<span class="sd">        variables (dict, optional): Pipeline variables.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        bool: True if the pipeline was triggered successfully, False otherwise.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">project_path_encoded</span> <span class="o">=</span> <span class="n">urllib</span><span class="o">.</span><span class="n">parse</span><span class="o">.</span><span class="n">quote_plus</span><span class="p">(</span><span class="n">repo_url</span><span class="p">)</span>
+    <span class="n">api_url</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">GITLAB_API_URL</span><span class="si">}</span><span class="s2">/api/v4/projects/</span><span class="si">{</span><span class="n">project_path_encoded</span><span class="si">}</span><span class="s2">/trigger/pipeline&quot;</span>
+    <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;PRIVATE-TOKEN&quot;</span><span class="p">:</span> <span class="n">token</span><span class="p">}</span>
+    <span class="n">trigger_token</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">&quot;CI_TRIGGER_PIPELINE_TOKEN&quot;</span><span class="p">)</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;token&quot;</span><span class="p">:</span> <span class="n">trigger_token</span><span class="p">,</span> <span class="s2">&quot;ref&quot;</span><span class="p">:</span> <span class="n">branch</span><span class="p">}</span>
+
+    <span class="k">if</span> <span class="n">variables</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">variables</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">data</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;variables[</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">trigger_token</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+            <span class="s2">&quot;CI_TRIGGER_PIPELINE_TOKEN environment variable not set. Cannot trigger pipeline.&quot;</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">api_url</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">200</span><span class="p">,</span> <span class="mi">201</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Pipeline triggered for </span><span class="si">{</span><span class="n">repo_url</span><span class="si">}</span><span class="s2"> on branch </span><span class="si">{</span><span class="n">branch</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Failed to trigger pipeline: </span><span class="si">{</span><span class="n">response</span><span class="o">.</span><span class="n">text</span><span class="si">}</span><span class="s2"> (Status: </span><span class="si">{</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="si">}</span><span class="s2">)&quot;</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Exception while triggering pipeline: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Auto Doc Team.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

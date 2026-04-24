@@ -1,0 +1,25 @@
+src.utils
+=========
+
+.. py:module:: src.utils
+
+.. autoapi-nested-parse::
+
+   Utility helpers package.
+
+
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   /autoapi/src/utils/code_block_extraction/index
+   /autoapi/src/utils/docstring_generation/index
+   /autoapi/src/utils/docstring_validation/index
+   /autoapi/src/utils/generate_yml_content/index
+   /autoapi/src/utils/git_utils/index
+   /autoapi/src/utils/update_conf_content/index
+
+

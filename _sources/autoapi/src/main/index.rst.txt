@@ -1,0 +1,22 @@
+src.main
+========
+
+.. py:module:: src.main
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   src.main.logger
+   src.main.app
+
+
+Module Contents
+---------------
+
+.. py:data:: logger
+
+.. py:data:: app
+

@@ -1,0 +1,39 @@
+src.router.router
+=================
+
+.. py:module:: src.router.router
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   src.router.router.logger
+   src.router.router.router
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   src.router.router.root
+   src.router.router.generate_docs
+
+
+Module Contents
+---------------
+
+.. py:data:: logger
+
+.. py:data:: router
+
+.. py:function:: root()
+   :async:
+
+
+.. py:function:: generate_docs(req: models.repo_request.RepoRequest)
+   :async:
+
+
