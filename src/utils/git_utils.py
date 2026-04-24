@@ -159,6 +159,15 @@ def fetch_repo_tree(
     logger.info(f"Gitignore patterns: {gitignore_patterns}")
 
     def _fetch_tree(path: str = "") -> List[Dict]:
+        """
+        Fetches the repository tree from GitHub or GitLab.
+        
+        Args:
+            path (str): The path to the directory in the repository.
+        
+        Returns:
+            List[Dict]: A list of files and directories in the specified path.
+        """
         if provider == "github":
             url = f"{GITHUB_API_URL}/repos/{repo_path}/contents/{path}"
             headers = {
@@ -468,6 +477,20 @@ def create_directory_and_add_files(
 
 
 def create_a_file(repo_url, branch, file_path, content, token, provider):
+    """
+    Create or update a file in a specified repository on GitHub or GitLab.
+    
+        Args:
+            repo_url (str): The repository URL.
+            branch (str): The branch name.
+            file_path (str): The path of the file to create/update.
+            content (str): The content to write to the file.
+            token (str): The access token for authentication.
+            provider (str): The service provider ('github' or 'gitlab').
+    
+        Returns:
+            bool: True if the operation was successful, False otherwise.
+    """
     if provider == "github":
         # GitHub: Create or update a file using the REST API
         api_url = f"{GITHUB_API_URL}/repos/{repo_url}/contents/{file_path}"

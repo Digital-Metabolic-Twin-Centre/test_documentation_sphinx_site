@@ -27,4 +27,13 @@ logging.getLogger("uvicorn.access").setLevel(logging.WARNING)
 
 
 def get_logger(name: str):
+    """
+    Retrieve a logger instance with the specified name.
+    
+        Args:
+            name (str): The name of the logger to retrieve.
+    
+        Returns:
+            logging.Logger: The logger instance associated with the given name.
+    """
     return logging.getLogger(name)

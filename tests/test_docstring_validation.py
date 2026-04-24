@@ -5,6 +5,16 @@ from utils.docstring_validation import (
 
 
 def test_analyze_docstring_in_module_returns_python_module_docstring():
+    """
+    Analyzes a Python module's docstring.
+    
+        Args:
+            content (str): The content of the Python module as a string.
+            language (str): The programming language of the module.
+    
+        Returns:
+            str: The extracted module docstring.
+    """
     content = '"""Module summary."""\n\n\ndef run():\n    return True\n'
 
     result = analyze_docstring_in_module(content, "python")
@@ -13,6 +23,18 @@ def test_analyze_docstring_in_module_returns_python_module_docstring():
 
 
 def test_analyze_docstring_in_blocks_flags_missing_python_docstrings(monkeypatch):
+    """
+    Analyze code blocks for missing Python docstrings.
+    
+    Args:
+        blocks (list): List of code block strings to analyze.
+        file_name (str): Name of the file containing the code.
+        file_path (str): Path to the file containing the code.
+        language (str): Programming language of the code.
+    
+    Returns:
+        dict: A dictionary with analysis results including missing docstrings.
+    """
     monkeypatch.setattr(
         "utils.docstring_validation.generate_docstring_with_openai",
         lambda code, language: None,
@@ -38,6 +60,18 @@ def test_analyze_docstring_in_blocks_flags_missing_python_docstrings(monkeypatch
 
 
 def test_analyze_docstring_in_blocks_detects_existing_python_docstrings():
+    """
+    Analyzes code blocks for existing Python docstrings.
+    
+    Args:
+        blocks (list): List of code blocks to analyze.
+        file_name (str): Name of the file containing the code.
+        file_path (str): Path to the file.
+        language (str): Programming language of the code.
+    
+    Returns:
+        dict: Analysis result including blocks with docstrings and their content.
+    """
     blocks = [
         "# --- Code Block starts at line 1 ---\n"
         'def run_task():\n    """Run the task."""\n    return True\n'
