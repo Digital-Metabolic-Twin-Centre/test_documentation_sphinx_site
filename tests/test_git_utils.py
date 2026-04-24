@@ -4,7 +4,7 @@ from utils.git_utils import extract_repo_path, should_ignore
 def test_extract_repo_path_strips_protocol_and_git_suffix():
     """
     """
-    Test the extraction of repository path by stripping the protocol and '.git' suffix.
+    Test the extraction of repository path from a URL by stripping the protocol and '.git' suffix.
     
     Args:
         None
@@ -36,7 +36,7 @@ def test_should_ignore_matches_file_and_directory_patterns():
     """Test the behavior of ignoring file and directory patterns.
     
         Args:
-            patterns (list of str): A list of patterns to check against.
+            patterns (list of str): A list of patterns to match against.
     
         Returns:
             None: This function asserts conditions and does not return a value.

@@ -13,7 +13,8 @@ def test_analyze_docstring_in_module_returns_python_module_docstring():
             language (str): The programming language of the module.
     
         Returns:
-            str: The extracted docstring from the module."""
+            str: The extracted module docstring.
+        """
     """
     content = '"""Module summary."""\n\n\ndef run():\n    return True\n'
 
@@ -28,7 +29,7 @@ def test_analyze_docstring_in_blocks_flags_missing_python_docstrings(monkeypatch
     Analyze code blocks for missing Python docstrings.
     
     Args:
-        blocks (list): List of code blocks to analyze.
+        blocks (list): List of code blocks as strings.
         file_name (str): Name of the file containing the code.
         file_path (str): Path to the file.
         language (str): Programming language of the code.
@@ -63,17 +64,16 @@ def test_analyze_docstring_in_blocks_flags_missing_python_docstrings(monkeypatch
 
 def test_analyze_docstring_in_blocks_detects_existing_python_docstrings():
     """
-    """Analyzes code blocks for existing Python docstrings.
+    Analyzes code blocks for existing Python docstrings.
     
-        Args:
-            blocks (list): A list of code block strings to analyze.
-            file_name (str): The name of the file containing the code.
-            file_path (str): The path to the file.
-            language (str): The programming language of the code.
+     Args:
+         blocks (list): List of code blocks to analyze.
+         file_name (str): Name of the file containing the code.
+         file_path (str): Path to the file.
+         language (str): Programming language of the code.
     
-        Returns:
-            dict: A dictionary with the count of blocks with docstrings and their content.
-        """
+     Returns:
+         dict: A dictionary with the count of blocks containing docstrings and their content.
     """
     blocks = [
         "# --- Code Block starts at line 1 ---\n"

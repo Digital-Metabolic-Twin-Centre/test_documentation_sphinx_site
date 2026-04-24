@@ -8,7 +8,7 @@ class GenericCodeBlockExtractor:
     
     Args:
         file_content (str): The content of the file as a string.
-        file_name (str): The name of the file, used for language detection.
+        file_name (str): The name of the file, used to determine the language.
     
     Returns:
         List[str]: A list of extracted code blocks.
@@ -161,14 +161,14 @@ class GenericCodeBlockExtractor:
 
     def _extract_python_function_complete(self, lines: List[str], start_idx: int) -> dict:
         """
-        """Extracts a complete Python function from a list of code lines starting at a given index.
+        """Extracts a complete Python function from a list of code lines.
         
             Args:
                 lines (List[str]): The list of code lines.
-                start_idx (int): The index to start extraction from.
+                start_idx (int): The starting index to search for the function.
         
             Returns:
-                dict: A dictionary containing the function code block and the ending line index, or None if incomplete.
+                dict: A dictionary containing the function code block and the ending line index, or None if not found.
             """
         """
         block = []
@@ -272,7 +272,7 @@ class GenericCodeBlockExtractor:
 
     def _extract_matlab_class(self, lines: List[str], start_idx: int) -> dict:
         """
-        Extracts a MATLAB code block from a list of lines starting at a given index.
+        """Extracts a MATLAB code block from a list of lines starting at a given index.
         
             Args:
                 lines (List[str]): The list of code lines.
@@ -280,6 +280,7 @@ class GenericCodeBlockExtractor:
         
             Returns:
                 dict: A dictionary containing the extracted code block and the ending line index.
+            """
         """
         block = []
         header = f"# --- Code Block starts at line {start_idx + 1} ---"

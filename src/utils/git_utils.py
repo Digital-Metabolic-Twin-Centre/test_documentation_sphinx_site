@@ -161,13 +161,13 @@ def fetch_repo_tree(
     def _fetch_tree(path: str = "") -> List[Dict]:
         """
         """
-        Fetches the directory tree from a specified repository on GitHub or GitLab.
+        Fetches the repository tree from GitHub or GitLab.
         
-        Args:
-            path (str): The path to the directory in the repository.
+            Args:
+                path (str): The path to the directory in the repository.
         
-        Returns:
-            List[Dict]: A list of files and directories in the specified path.
+            Returns:
+                List[Dict]: A list of files and directories in the specified path.
         """
         """
         if provider == "github":
@@ -480,7 +480,7 @@ def create_directory_and_add_files(
 
 def create_a_file(repo_url, branch, file_path, content, token, provider):
     """
-    """Create or update a file in a specified repository on GitHub or GitLab.
+    """Create or update a file in a specified repository using GitHub or GitLab API.
     
         Args:
             repo_url (str): The repository URL.
