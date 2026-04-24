@@ -40,6 +40,11 @@ def test_generate_endpoint_returns_success_when_services_succeed(monkeypatch):
 
 
 def test_generate_endpoint_returns_not_found_when_analysis_is_empty(monkeypatch):
+    """
+    Tests the /generate endpoint for a 404 response when analysis is empty.\n\n    Args:\n
+    monkeypatch: A pytest fixture to modify the behavior of the analyze_repo function.\n\n
+    Returns:\n        None: Asserts that the response status code is 404.\n
+    """
     monkeypatch.setattr(
         "router.router.analyze_repo",
         lambda provider, repo_url, token, branch: ("analysis.csv", []),

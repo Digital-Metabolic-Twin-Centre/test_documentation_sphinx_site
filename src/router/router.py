@@ -12,12 +12,29 @@ router = APIRouter()
 
 @router.get("/")
 async def root():
+    """
+    Asynchronously handles the root endpoint request.
+
+    Returns:
+        dict: A welcome message and API documentation link.
+    """
     logger.info("Root endpoint accessed.")
-    return {"message": "Welcome to the Markdown Generator API. Visit /docs for API documentation."}
+    return {
+        "message": "Welcome to the Markdown Generator API. Visit /docs for API documentation."
+    }
 
 
 @router.post("/generate")
 async def generate_docs(req: RepoRequest):
+    """
+    Asynchronously generates documentation by analyzing a repository and creating a Sphinx setup.
+
+    Args:
+        req (RepoRequest): The request object containing provider, repo_url, token, and branch.
+
+    Returns:
+        dict: A dictionary with the status of the operation and analysis results.
+    """
     logger.info(
         "/generate endpoint called with provider=%s, repo_url=%s, branch=%s",
         req.provider,
@@ -40,7 +57,9 @@ async def generate_docs(req: RepoRequest):
 
         # Check if analysis found any files
         if not docstring_analysis:
-            logger.warning("No files were analyzed. Repository may be empty or inaccessible.")
+            logger.warning(
+                "No files were analyzed. Repository may be empty or inaccessible."
+            )
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=(
@@ -73,7 +92,9 @@ async def generate_docs(req: RepoRequest):
         raise
     except ValueError as ve:
         logger.error(f"ValueError: {ve}")
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(ve))
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(ve)
+        )
     except PermissionError as pe:
         logger.error(f"PermissionError: {pe}")
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(pe))
