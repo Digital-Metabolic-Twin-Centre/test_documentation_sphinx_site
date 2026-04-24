@@ -47,9 +47,13 @@ def get_gitignore_patterns(
         List[str]: List of ignore patterns from .gitignore.
     """
     if provider == "github":
-        content = fetch_content_from_github(repo_path, branch, ".gitignore", access_token)
+        content = fetch_content_from_github(
+            repo_path, branch, ".gitignore", access_token
+        )
     elif provider == "gitlab":
-        content = fetch_content_from_gitlab(repo_path, branch, ".gitignore", access_token)
+        content = fetch_content_from_gitlab(
+            repo_path, branch, ".gitignore", access_token
+        )
     else:
         return []
     if not content:
@@ -155,10 +159,21 @@ def fetch_repo_tree(
         List[Dict]: List of files and directories in the repository.
     """
     repository_files = []
-    gitignore_patterns = get_gitignore_patterns(repo_path, access_token, branch, provider)
+    gitignore_patterns = get_gitignore_patterns(
+        repo_path, access_token, branch, provider
+    )
     logger.info(f"Gitignore patterns: {gitignore_patterns}")
 
     def _fetch_tree(path: str = "") -> List[Dict]:
+        """
+        Fetches the repository tree from GitHub or GitLab.
+
+            Args:
+                path (str): The path to the directory in the repository.
+
+            Returns:
+                List[Dict]: A list of files and directories in the specified path.
+        """
         if provider == "github":
             url = f"{GITHUB_API_URL}/repos/{repo_path}/contents/{path}"
             headers = {
@@ -190,7 +205,9 @@ def fetch_repo_tree(
             if should_ignore(item["name"], gitignore_patterns):
                 continue
             if item.get("type") in ["dir", "tree"]:
-                sub_items = _fetch_tree(os.path.join(path, item["name"]) if path else item["name"])
+                sub_items = _fetch_tree(
+                    os.path.join(path, item["name"]) if path else item["name"]
+                )
                 all_files.extend(sub_items)
             elif item.get("type") in ["file", "blob"]:
                 all_files.append(item)
@@ -300,7 +317,9 @@ def create_directory_and_add_files(
 
         # 2. Get the tree SHA
         commit_url = f"{base_api_url}/git/commits/{latest_commit_sha}"
-        commit_resp = requests.get(commit_url, headers={"Authorization": f"Bearer {token}"})
+        commit_resp = requests.get(
+            commit_url, headers={"Authorization": f"Bearer {token}"}
+        )
         if commit_resp.status_code != 200:
             logger.error(f"Failed to get commit: {commit_resp.text}")
             return False
@@ -393,7 +412,9 @@ def create_directory_and_add_files(
             pass
 
         if not gitkeep_exists:
-            actions.append({"action": "create", "file_path": gitkeep_path, "content": ""})
+            actions.append(
+                {"action": "create", "file_path": gitkeep_path, "content": ""}
+            )
 
         for file_path in file_paths:
             content = fetch_content_from_gitlab(repo_url, branch, file_path, token)
@@ -430,7 +451,9 @@ def create_directory_and_add_files(
             logger.info(
                 f"{'Updating' if file_exists else 'Adding'} file {file_name} to commit actions."
             )
-            actions.append({"action": action_type, "file_path": target_path, "content": content})
+            actions.append(
+                {"action": action_type, "file_path": target_path, "content": content}
+            )
 
         if not actions:
             logger.warning("No actions to commit.")
@@ -453,7 +476,10 @@ def create_directory_and_add_files(
                     "includes 'write_repository' scope in addition to "
                     "'api' and 'read_api'."
                 )
-            elif "not allowed to push" in error_msg.lower() or "protected" in error_msg.lower():
+            elif (
+                "not allowed to push" in error_msg.lower()
+                or "protected" in error_msg.lower()
+            ):
                 logger.error(
                     f"Branch '{branch}' is protected. Either use a different "
                     "branch, unprotect the branch, or add yourself as an "
@@ -468,6 +494,20 @@ def create_directory_and_add_files(
 
 
 def create_a_file(repo_url, branch, file_path, content, token, provider):
+    """
+    Create or update a file in a specified repository on GitHub or GitLab.
+
+    Args:
+        repo_url (str): The repository URL.
+        branch (str): The branch name.
+        file_path (str): The path of the file to create/update.
+        content (str): The content to write to the file.
+        token (str): The access token for authentication.
+        provider (str): The service provider ('github' or 'gitlab').
+
+    Returns:
+        bool: True if the operation was successful, False otherwise.
+    """
     if provider == "github":
         # GitHub: Create or update a file using the REST API
         api_url = f"{GITHUB_API_URL}/repos/{repo_url}/contents/{file_path}"
