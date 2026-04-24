@@ -2,6 +2,16 @@ from utils.code_block_extraction import GenericCodeBlockExtractor
 
 
 def test_python_code_block_extractor_finds_top_level_blocks():
+    """
+    Test function to verify the extraction of top-level code blocks from a given content.
+
+    Args:
+        content (str): The string content containing code blocks to be analyzed.
+
+    Returns:
+        list: A list of extracted top-level code blocks.
+
+    """
     content = '''
 def first():
     """doc"""
@@ -24,6 +34,16 @@ class Sample:
 
 
 def test_javascript_code_block_extractor_handles_curly_braces():
+    """
+    Test the JavaScript code block extractor for handling curly braces.
+
+    Args:
+        None
+
+    Returns:
+        None
+
+    """
     content = """
 function greet(name) {
   return `Hello ${name}`;

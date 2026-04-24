@@ -17,7 +17,9 @@ os.makedirs(LOG_DIR, exist_ok=True)
 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 LOG_FILE = os.path.join(LOG_DIR, f"app_{timestamp}.log")
 
-logging.basicConfig(level=LOG_LEVEL, format=LOG_FORMAT, handlers=[logging.FileHandler(LOG_FILE)])
+logging.basicConfig(
+    level=LOG_LEVEL, format=LOG_FORMAT, handlers=[logging.FileHandler(LOG_FILE)]
+)
 
 # Suppress logs from 'watchfiles' and 'uvicorn' in app.log
 logging.getLogger("watchfiles").setLevel(logging.WARNING)
@@ -27,4 +29,14 @@ logging.getLogger("uvicorn.access").setLevel(logging.WARNING)
 
 
 def get_logger(name: str):
+    """
+    Retrieve a logger instance with the specified name.
+
+        Args:
+            name (str): The name of the logger to retrieve.
+
+        Returns:
+            logging.Logger: The logger instance associated with the given name.
+
+    """
     return logging.getLogger(name)
