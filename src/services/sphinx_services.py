@@ -35,6 +35,20 @@ logger = get_logger(__name__)
 def create_sphinx_setup(provider, repo_url, token, branch, docstring_analysis_file):
 
     # Extract repo path from URL
+    """
+    """Sets up Sphinx documentation for a repository based on docstring coverage.
+    
+        Args:
+            provider (str): The version control provider (e.g., 'gitlab' or 'github').
+            repo_url (str): The URL of the repository.
+            token (str): Access token for the repository.
+            branch (str): The branch to operate on.
+            docstring_analysis_file (str): Path to the CSV file containing docstring analysis.
+    
+        Returns:
+            bool: True if setup is successful, False otherwise.
+        """
+    """
     repo_path = extract_repo_path(repo_url, provider)
     logger.info(f"Extracted repo path: {repo_path}")
 

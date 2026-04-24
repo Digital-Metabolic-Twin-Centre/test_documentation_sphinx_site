@@ -12,12 +12,30 @@ router = APIRouter()
 
 @router.get("/")
 async def root():
+    """
+    """
+    Asynchronously handles the root endpoint request.
+    
+    Returns:
+        dict: A welcome message and API documentation link.
+    """
+    """
     logger.info("Root endpoint accessed.")
     return {"message": "Welcome to the Markdown Generator API. Visit /docs for API documentation."}
 
 
 @router.post("/generate")
 async def generate_docs(req: RepoRequest):
+    """
+    """Asynchronously generates documentation for a repository based on provided parameters.
+    
+        Args:
+            req (RepoRequest): The request object containing provider, repo_url, token, and branch.
+    
+        Returns:
+            dict: A dictionary with status, sphinx_setup_created flag, and docstring analysis results.
+        """
+    """
     logger.info(
         "/generate endpoint called with provider=%s, repo_url=%s, branch=%s",
         req.provider,
